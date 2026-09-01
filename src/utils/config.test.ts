@@ -149,6 +149,7 @@ describe("config utils", () => {
   });
 
   it("enforces a reverse-proxy site binding after well-known configuration", async () => {
+    localStorage.setItem("home_server", "stale.example.org");
     vi.mocked(fetch)
       .mockResolvedValueOnce(
         new Response(

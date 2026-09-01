@@ -73,7 +73,7 @@ export const FetchConfig = async () => {
   }
   LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
 
-  await FetchWellKnownConfig();
+  await FetchWellKnownConfig(siteBoundBaseUrl);
 
   LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
 
@@ -82,15 +82,24 @@ export const FetchConfig = async () => {
   }
 };
 
-export const FetchWellKnownConfig = async () => {
+export const FetchWellKnownConfig = async (boundBaseUrl?: string) => {
   let protocol = "https";
-  const baseURL = localStorage.getItem("base_url");
-  if (baseURL && baseURL.startsWith("http://")) {
-    protocol = "http";
-  }
+  let homeserver: string | null = null;
 
-  // if home_server is set, try to load https://home_server/.well-known/matrix/client
-  let homeserver = localStorage.getItem("home_server");
+  if (boundBaseUrl) {
+    const boundURL = new URL(boundBaseUrl);
+    protocol = boundURL.protocol.slice(0, -1);
+    homeserver = boundURL.host;
+  } else {
+    const baseURL = localStorage.getItem("base_url");
+    if (baseURL && baseURL.startsWith("http://")) {
+      protocol = "http";
+    }
+
+    // Without a proxy binding, retain the upstream lookup behavior for direct
+    // unit-level callers of this helper.
+    homeserver = localStorage.getItem("home_server");
+  }
   // if it is not set, attempt to identify homeserver from the restrictBaseUrl config
   if (!homeserver) {
     const restrictBaseUrl = config.restrictBaseUrl;
