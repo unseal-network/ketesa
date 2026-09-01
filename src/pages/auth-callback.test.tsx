@@ -4,9 +4,28 @@ import { waitFor } from "@testing-library/react";
 describe("auth-callback entrypoint", () => {
   beforeEach(() => {
     vi.resetModules();
-    vi.doUnmock("../utils/config");
-    vi.doUnmock("../components/etke.cc/InstanceConfig");
     vi.doUnmock("../providers/auth");
+    vi.doMock("../utils/config", async () => ({
+      __esModule: true,
+      ...(await vi.importActual("../utils/config")),
+      FetchConfig: vi.fn().mockResolvedValue(undefined),
+      GetConfig: () => ({
+        etkeccAdmin: "",
+        siteBinding: {
+          siteId: "site_000014",
+          homeserverUrl: "https://im.unseal.build",
+          serverName: "im.unseal.build",
+          appName: "Unseal",
+        },
+      }),
+    }));
+    vi.doMock("../components/etke.cc/InstanceConfig", async () => ({
+      __esModule: true,
+      ...(await vi.importActual("../components/etke.cc/InstanceConfig")),
+      FetchInstanceConfig: vi.fn().mockResolvedValue(undefined),
+      GetInstanceConfig: () => ({ name: "" }),
+      useInstanceConfig: () => ({ name: "", disabled: { attributions: false } }),
+    }));
   });
 
   it("redirects to provided path on success", async () => {

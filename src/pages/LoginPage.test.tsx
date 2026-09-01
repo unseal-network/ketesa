@@ -186,7 +186,7 @@ describe("LoginPage rendering", () => {
     );
 
     screen.getByText("Unseal后台");
-    screen.getByText("im.unseal.build");
+    expect(screen.getAllByText("im.unseal.build")).toHaveLength(2);
     expect(screen.queryByText(descriptionText)).toBeNull();
     expect(screen.queryByRole("link", { name: /Ketesa/i })).toBeNull();
   });
