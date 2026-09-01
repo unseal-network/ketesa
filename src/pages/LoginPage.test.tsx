@@ -34,6 +34,7 @@ vi.mock("../providers/data/synapse", async importOriginal => {
 
 const i18nProvider = polyglotI18nProvider(() => englishMessages, "en", [{ locale: "en", name: "English" }]);
 const welcomeText = englishMessages.ketesa.auth.welcome.replace("%{name}", "Ketesa");
+const descriptionText = englishMessages.ketesa.auth.description;
 const auth = englishMessages.ketesa.auth;
 const signIn = englishMessages.ra.auth.sign_in;
 
@@ -159,6 +160,35 @@ describe("LoginPage rendering", () => {
     renderSingleRestrict();
 
     expect(screen.getByRole("contentinfo")).toHaveStyle({ position: "static" });
+  });
+
+  it("uses the published app identity instead of platform marketing", () => {
+    render(
+      <AppContext.Provider
+        value={{
+          restrictBaseUrl: "https://im.unseal.build",
+          asManagedUsers: [],
+          menu: [],
+          corsCredentials: "include",
+          externalAuthProvider: false,
+          siteBinding: {
+            siteId: "site_000014",
+            homeserverUrl: "https://im.unseal.build",
+            serverName: "im.unseal.build",
+            appName: "Unseal",
+          },
+        }}
+      >
+        <AdminContext i18nProvider={i18nProvider}>
+          <LoginPage />
+        </AdminContext>
+      </AppContext.Provider>
+    );
+
+    screen.getByText("Unseal后台");
+    screen.getByText("im.unseal.build");
+    expect(screen.queryByText(descriptionText)).toBeNull();
+    expect(screen.queryByRole("link", { name: /Ketesa/i })).toBeNull();
   });
 
   it("renders the base URL combobox for multiple restricted homeservers", () => {

@@ -9,15 +9,19 @@ import { EtkeAttribution } from "../components/etke.cc/EtkeAttribution";
 import { useInstanceConfig } from "../components/etke.cc/InstanceConfig";
 import { createI18nProvider } from "../i18n";
 import { Footer, LoginFormBox } from "../components/layout";
+import { GetConfig } from "../utils/config";
+import { getSiteBranding } from "../utils/site-branding";
 
 const AuthCallbackErrorView = ({ message, onBack }: { message: string; onBack: () => void }): React.ReactElement => {
   const icfg = useInstanceConfig();
   const translate = useTranslate();
-  let welcomeTo = "Ketesa";
-  let logoUrl = "./images/logo.webp";
+  const siteBinding = GetConfig().siteBinding;
+  const siteBranding = getSiteBranding(siteBinding);
+  let welcomeTo = siteBranding?.adminName || "Ketesa";
+  let logoUrl = siteBranding ? "" : "./images/logo.webp";
   let footerLogoUrl = "./images/logo.webp";
   let backgroundUrl = "";
-  if (icfg.name) {
+  if (icfg.name && !siteBranding) {
     welcomeTo = icfg.name;
   }
   if (icfg.logo_url) {
@@ -39,7 +43,12 @@ const AuthCallbackErrorView = ({ message, onBack }: { message: string; onBack: (
       )}
       <Card className="card">
         <Box className="avatar">
-          <Avatar sx={{ width: { xs: "80px", sm: "120px" }, height: { xs: "80px", sm: "120px" } }} src={logoUrl} />
+          <Avatar
+            sx={{ width: { xs: "80px", sm: "120px" }, height: { xs: "80px", sm: "120px" }, fontSize: "2rem" }}
+            src={logoUrl || undefined}
+          >
+            {!logoUrl ? siteBranding?.initial : null}
+          </Avatar>
         </Box>
         <Box className="hint">{translate("ketesa.auth.welcome", { name: welcomeTo })}</Box>
         <Box className="form">
@@ -57,7 +66,7 @@ const AuthCallbackErrorView = ({ message, onBack }: { message: string; onBack: (
         </CardActions>
       </Card>
       <EtkeAttribution>
-        <Footer logoSrc={footerLogoUrl} placement="flow" />
+        <Footer logoSrc={footerLogoUrl} placement="flow" siteBinding={siteBinding} />
       </EtkeAttribution>
     </LoginFormBox>
   );

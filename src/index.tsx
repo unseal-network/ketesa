@@ -7,6 +7,7 @@ import { ConfigProvider } from "./Context";
 import { FetchInstanceConfig, GetInstanceConfig } from "./components/etke.cc/InstanceConfig";
 import { createI18nProvider } from "./i18n";
 import { FetchConfig, GetConfig } from "./utils/config";
+import { getSiteBranding } from "./utils/site-branding";
 
 await FetchConfig();
 await FetchInstanceConfig(GetConfig().etkeccAdmin, "");
@@ -16,10 +17,11 @@ const i18nProvider = await createI18nProvider();
 // as a tricky workaround since hooks can't be used outside components,
 // and react-admin doesn't provide a way to set document title directly
 const icfg = GetInstanceConfig();
-document.head.dataset.baseTitle = icfg.name || "Ketesa";
-// set <title> based on instance name, only if it's not already set
-if (icfg.name && !document.title.includes(icfg.name)) {
-  document.title = icfg.name;
+const siteBranding = getSiteBranding(GetConfig().siteBinding);
+const baseTitle = siteBranding?.adminName || icfg.name || "Ketesa";
+document.head.dataset.baseTitle = baseTitle;
+if (!document.title.includes(baseTitle)) {
+  document.title = baseTitle;
 }
 
 createRoot(document.getElementById("root")).render(

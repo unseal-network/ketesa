@@ -1,6 +1,8 @@
 export interface SiteBinding {
   homeserverUrl: string;
   siteId?: string;
+  serverName?: string;
+  appName?: string;
 }
 
 const siteIdPattern = /^site_[A-Za-z0-9]+$/;
@@ -29,6 +31,15 @@ export const resolveSiteBinding = (value: unknown): string | null => {
   const binding = value as Partial<SiteBinding>;
   if (binding.siteId !== undefined && (typeof binding.siteId !== "string" || !siteIdPattern.test(binding.siteId))) {
     throw new SiteBindingError("siteBinding.siteId must match site_[A-Za-z0-9]+");
+  }
+  for (const field of ["serverName", "appName"] as const) {
+    const fieldValue = binding[field];
+    if (
+      fieldValue !== undefined &&
+      (typeof fieldValue !== "string" || fieldValue.trim() === "" || fieldValue.length > 120)
+    ) {
+      throw new SiteBindingError(`siteBinding.${field} must be a non-empty string of at most 120 characters`);
+    }
   }
   if (typeof binding.homeserverUrl !== "string" || binding.homeserverUrl.trim() === "") {
     throw new SiteBindingError("siteBinding.homeserverUrl is required");

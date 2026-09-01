@@ -21,6 +21,7 @@ import { LoginFormSections } from "../components/login/LoginFormSections";
 import { LoginMethod } from "../components/login/types";
 import { useLoginProbe } from "../components/login/useLoginProbe";
 import createLogger from "../utils/logger";
+import { getSiteBranding } from "../utils/site-branding";
 
 const log = createLogger("login");
 
@@ -71,6 +72,8 @@ function useRestrictedBaseUrl(): [string | null, string[] | null] {
 const LoginPage = () => {
   const login = useLogin();
   const notify = useNotify();
+  const { siteBinding } = useAppContext();
+  const siteBranding = getSiteBranding(siteBinding);
   const [restrictBaseUrlSingle, restrictBaseUrlMultiple] = useRestrictedBaseUrl();
   const baseUrlChoices = restrictBaseUrlMultiple ? restrictBaseUrlMultiple : [];
   const localStorageBaseUrl = localStorage.getItem("base_url");
@@ -157,10 +160,10 @@ const LoginPage = () => {
   };
 
   const icfg = useInstanceConfig();
-  let welcomeTo = "Ketesa";
-  let logoUrl = "./images/logo.webp";
+  let welcomeTo = siteBranding?.adminName || "Ketesa";
+  let logoUrl = siteBranding ? "" : "./images/logo.webp";
   let backgroundUrl = "";
-  if (icfg.name) {
+  if (icfg.name && !siteBranding) {
     welcomeTo = icfg.name;
   }
   if (icfg.logo_url) {
@@ -191,7 +194,12 @@ const LoginPage = () => {
             {loading ? (
               <CircularProgress size={80} thickness={3} />
             ) : (
-              <Avatar sx={{ width: { xs: "80px", sm: "120px" }, height: { xs: "80px", sm: "120px" } }} src={logoUrl} />
+              <Avatar
+                sx={{ width: { xs: "80px", sm: "120px" }, height: { xs: "80px", sm: "120px" }, fontSize: "2rem" }}
+                src={logoUrl || undefined}
+              >
+                {!logoUrl ? siteBranding?.initial : null}
+              </Avatar>
             )}
           </Box>
           <Box className="hint">{translate("ketesa.auth.welcome", { name: welcomeTo })}</Box>
@@ -207,7 +215,7 @@ const LoginPage = () => {
               textAlign: "center",
             }}
           >
-            {translate("ketesa.auth.description")}
+            {siteBranding?.serverName || translate("ketesa.auth.description")}
           </Box>
           <Box className="form">
             <FormDataConsumer>
@@ -264,7 +272,7 @@ const LoginPage = () => {
       </LoginFormBox>
       <Notification />
       <EtkeAttribution>
-        <Footer placement="flow" />
+        <Footer placement="flow" siteBinding={siteBinding} />
       </EtkeAttribution>
     </Form>
   );

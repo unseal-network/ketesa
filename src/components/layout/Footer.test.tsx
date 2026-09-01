@@ -64,4 +64,22 @@ describe("Footer", () => {
 
     expect(screen.getByRole("contentinfo")).toHaveStyle({ position: "static" });
   });
+
+  it("shows published site identity instead of platform attribution", () => {
+    render(
+      <Footer
+        siteBinding={{
+          siteId: "site_000014",
+          homeserverUrl: "https://im.unseal.build",
+          serverName: "im.unseal.build",
+          appName: "Unseal",
+        }}
+      />,
+      { wrapper }
+    );
+
+    screen.getByText("Unseal后台");
+    screen.getByText("im.unseal.build");
+    expect(screen.queryByRole("link")).toBeNull();
+  });
 });

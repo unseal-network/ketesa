@@ -8,6 +8,8 @@ describe("site binding", () => {
       resolveSiteBinding({
         siteId: "site_01J8MATRIX",
         homeserverUrl: "https://matrix.example.com/",
+        serverName: "matrix.example.com",
+        appName: "Example Chat",
       })
     ).toBe("https://matrix.example.com");
   });
@@ -22,6 +24,8 @@ describe("site binding", () => {
     [{ homeserverUrl: "https://matrix.example.com?tenant=other" }, "origin"],
     [{ siteId: "other-site", homeserverUrl: "https://matrix.example.com" }, "siteId"],
     [{ siteId: "site_01J8MATRIX" }, "homeserverUrl"],
+    [{ homeserverUrl: "https://matrix.example.com", appName: "" }, "appName"],
+    [{ homeserverUrl: "https://matrix.example.com", serverName: 42 }, "serverName"],
   ])("rejects an unsafe binding %#", (binding, expectedMessage) => {
     expect(() => resolveSiteBinding(binding)).toThrowError(SiteBindingError);
     expect(() => resolveSiteBinding(binding)).toThrow(expectedMessage);

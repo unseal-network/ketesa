@@ -40,15 +40,19 @@ import dataProvider from "./providers/data";
 import { isMAS } from "./providers/data/mas";
 import { lightTheme, darkTheme } from "./assets/theme";
 import { AdminLayout } from "./components/layout";
+import { useAppContext } from "./Context";
+import { getSiteBranding } from "./utils/site-branding";
 
 const Route = reactRouterProvider.Route;
 const queryClient = new QueryClient();
 
 export const App = ({ i18nProvider }: { i18nProvider: I18nProvider }) => {
   const icfg = useInstanceConfig();
+  const { siteBinding } = useAppContext();
+  const siteBranding = getSiteBranding(siteBinding);
   const masEnabled = isMAS();
-  let title = "Ketesa";
-  if (icfg.name) {
+  let title = siteBranding?.adminName || "Ketesa";
+  if (icfg.name && !siteBranding) {
     title = icfg.name;
   }
 
@@ -67,7 +71,7 @@ export const App = ({ i18nProvider }: { i18nProvider: I18nProvider }) => {
         darkTheme={darkTheme}
       >
         <CustomRoutes>
-          <Route path="/donate" element={<DonatePage />} />
+          {!siteBinding && <Route path="/donate" element={<DonatePage />} />}
           <Route path="/import_users" element={<UserImport />} />
           {!icfg.disabled.monitoring && <Route path="/server_status" element={<ServerStatusPage />} />}
           {!icfg.disabled.actions && <Route path="/server_actions" element={<ServerActionsPage />} />}

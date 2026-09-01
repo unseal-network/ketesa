@@ -11,11 +11,10 @@ export interface Config {
   externalAuthProvider?: boolean;
   etkeccAdmin?: string;
   wellKnownDiscovery?: boolean;
-}
-
-interface DeploymentConfig extends Partial<Config> {
   siteBinding?: SiteBinding;
 }
+
+type DeploymentConfig = Partial<Config>;
 
 export interface MenuItem {
   label: string;
@@ -75,7 +74,7 @@ export const FetchConfig = async () => {
 
   await FetchWellKnownConfig(siteBoundBaseUrl);
 
-  LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
+  LoadConfig({ restrictBaseUrl: siteBoundBaseUrl, siteBinding: deploymentConfig?.siteBinding });
 
   if (config.externalAuthProvider !== undefined) {
     SetExternalAuthProvider(config.externalAuthProvider);
@@ -204,6 +203,11 @@ export const LoadConfig = (context: Partial<Config>) => {
 
   if (context?.wellKnownDiscovery !== undefined) {
     nextConfig.wellKnownDiscovery = context.wellKnownDiscovery;
+    changed = true;
+  }
+
+  if (context?.siteBinding) {
+    nextConfig.siteBinding = context.siteBinding;
     changed = true;
   }
 

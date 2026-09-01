@@ -47,6 +47,7 @@ import { EtkeStatusPoller, ServerStatusStyledBadge } from "../etke.cc/ServerStat
 import { BillingStatusBadge, BillingStatusPoller } from "../etke.cc/BillingStatusBadge";
 import { isMAS } from "../../providers/data/mas";
 import { useAppContext } from "../../Context";
+import { getSiteBranding } from "../../utils/site-branding";
 
 const ServerVersionItems = () => {
   const serverVersions = useServerVersions();
@@ -151,6 +152,7 @@ const DonateMenuItem = () => {
 export const AdminUserMenu = () => {
   const [open, setOpen] = useState(false);
   const logout = useLogout();
+  const { siteBinding } = useAppContext();
   const checkLoginType = (ev: React.MouseEvent<HTMLDivElement>) => {
     const loginType: LoginMethod = (localStorage.getItem("login_type") || "credentials") as LoginMethod;
     if (loginType === "accessToken") {
@@ -180,7 +182,7 @@ export const AdminUserMenu = () => {
       <Divider sx={{ my: 0.5 }} />
       <AdminClientConfigItems />
       <LocaleMenuItems />
-      <DonateMenuItem />
+      {!siteBinding && <DonateMenuItem />}
       <div onClickCapture={checkLoginType}>
         <Logout />
       </div>
@@ -420,15 +422,18 @@ export const AdminLayout = ({ children }) => {
   // Set the document language based on the selected locale
   const [locale, _setLocale] = useLocaleState();
   const icfg = useInstanceConfig();
+  const { siteBinding } = useAppContext();
+  const siteBranding = getSiteBranding(siteBinding);
   const translate = useTranslate();
   useEffect(() => {
     document.documentElement.lang = locale;
 
     // copy of the code from index.tsx to set base title dynamically
-    document.head.dataset.baseTitle = icfg.name || "Ketesa";
+    const baseTitle = siteBranding?.adminName || icfg.name || "Ketesa";
+    document.head.dataset.baseTitle = baseTitle;
     // set <title> based on instance name, only if it's not already set
-    if (icfg.name && !document.title.includes(icfg.name)) {
-      document.title = icfg.name;
+    if (!document.title.includes(baseTitle)) {
+      document.title = baseTitle;
     }
 
     if (icfg.favicon_url) {
@@ -442,7 +447,7 @@ export const AdminLayout = ({ children }) => {
         document.getElementsByTagName("head")[0].appendChild(newLink);
       }
     }
-  }, [locale, icfg.name, icfg.favicon_url]);
+  }, [locale, icfg.name, icfg.favicon_url, siteBranding?.adminName]);
 
   return (
     <>
@@ -493,7 +498,7 @@ export const AdminLayout = ({ children }) => {
         <CheckForApplicationUpdate />
       </Layout>
       <EtkeAttribution>
-        <Footer />
+        <Footer siteBinding={siteBinding} />
       </EtkeAttribution>
     </>
   );

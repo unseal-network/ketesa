@@ -2,15 +2,20 @@ import { Avatar, Box, Link } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 
+import { SiteBinding } from "../../utils/site-binding";
+import { getSiteBranding } from "../../utils/site-branding";
+
 interface FooterProps {
   logoSrc?: string;
   placement?: "fixed" | "flow";
+  siteBinding?: SiteBinding;
 }
 
-const Footer = ({ logoSrc = "./images/logo.webp", placement = "fixed" }: FooterProps) => {
+const Footer = ({ logoSrc = "./images/logo.webp", placement = "fixed", siteBinding }: FooterProps) => {
   const [version, setVersion] = useState<string | null>(null);
   const theme = useTheme();
   const isFixed = placement === "fixed";
+  const siteBranding = getSiteBranding(siteBinding);
 
   useEffect(() => {
     const version = document.getElementById("js-version")?.textContent;
@@ -41,50 +46,65 @@ const Footer = ({ logoSrc = "./images/logo.webp", placement = "fixed" }: FooterP
         gap: "10px",
       }}
     >
-      <Avatar src={logoSrc} sx={{ width: "1rem", height: "1rem", display: "inline-block", verticalAlign: "sub" }} />{" "}
-      <Link href="https://github.com/etkecc/ketesa" target="_blank" sx={{ color: "inherit" }}>
-        Ketesa {version}
-      </Link>
-      <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
-        by{" "}
-        <Link
-          href="https://etke.cc/?utm_source=ketesa&utm_medium=footer&utm_campaign=ketesa"
-          target="_blank"
-          sx={{ color: "#f49300", fontWeight: 500 }}
-        >
-          etke.cc
-        </Link>
-      </Box>
-      <Link
-        sx={{ fontWeight: "bold", color: "inherit", display: { xs: "none", sm: "inline" }, ml: "auto" }}
-        href="https://matrix.to/#/#ketesa:etke.cc"
-        target="_blank"
-      >
-        {/* Matrix icon, trademark of The Matrix.org Foundation (https://matrix.org). Use of this logo does not imply endorsement or affiliation. */}
-        <Box
-          component="svg"
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 520 520"
-          sx={{
-            width: "1rem",
-            height: "1rem",
-            display: "inline-block",
-            verticalAlign: "sub",
-            fill: "#FFFFFF",
-            mr: "4px",
-          }}
-        >
-          <title>
-            {
-              "This logo is the trademark of The Matrix.org Foundation (https://matrix.org). Use of this logo does not imply endorsement or affiliation."
-            }
-          </title>
-          <path d="M13.7,11.9v496.2h35.7V520H0V0h49.4v11.9H13.7z" />
-          <path d="M166.3,169.2v25.1h0.7c6.7-9.6,14.8-17,24.2-22.2c9.4-5.3,20.3-7.9,32.5-7.9c11.7,0,22.4,2.3,32.1,6.8c9.7,4.5,17,12.6,22.1,24c5.5-8.1,13-15.3,22.4-21.5c9.4-6.2,20.6-9.3,33.5-9.3c9.8,0,18.9,1.2,27.3,3.6c8.4,2.4,15.5,6.2,21.5,11.5c6,5.3,10.6,12.1,14,20.6c3.3,8.5,5,18.7,5,30.7v124.1h-50.9V249.6c0-6.2-0.2-12.1-0.7-17.6c-0.5-5.5-1.8-10.3-3.9-14.3c-2.2-4.1-5.3-7.3-9.5-9.7c-4.2-2.4-9.9-3.6-17-3.6c-7.2,0-13,1.4-17.4,4.1c-4.4,2.8-7.9,6.3-10.4,10.8c-2.5,4.4-4.2,9.4-5,15.1c-0.8,5.6-1.3,11.3-1.3,17v103.3h-50.9v-104c0-5.5-0.1-10.9-0.4-16.3c-0.2-5.4-1.3-10.3-3.1-14.9c-1.8-4.5-4.8-8.2-9-10.9c-4.2-2.7-10.3-4.1-18.5-4.1c-2.4,0-5.6,0.5-9.5,1.6c-3.9,1.1-7.8,3.1-11.5,6.1c-3.7,3-6.9,7.3-9.5,12.9c-2.6,5.6-3.9,13-3.9,22.1v107.6h-50.9V169.2H166.3z" />
-          <path d="M506.3,508.1V11.9h-35.7V0H520v520h-49.4v-11.9H506.3z" />
-        </Box>
-        #ketesa:etke.cc
-      </Link>
+      {siteBranding && (
+        <>
+          <Avatar sx={{ width: "1rem", height: "1rem", fontSize: "0.7rem" }}>{siteBranding.initial}</Avatar>
+          <Box component="span" sx={{ fontWeight: 600 }}>
+            {siteBranding.adminName}
+          </Box>
+          <Box component="span" sx={{ ml: "auto", color: "inherit", opacity: 0.8 }}>
+            {siteBranding.serverName}
+          </Box>
+        </>
+      )}
+      {!siteBranding && (
+        <>
+          <Avatar src={logoSrc} sx={{ width: "1rem", height: "1rem", display: "inline-block", verticalAlign: "sub" }} />{" "}
+          <Link href="https://github.com/etkecc/ketesa" target="_blank" sx={{ color: "inherit" }}>
+            Ketesa {version}
+          </Link>
+          <Box component="span" sx={{ display: { xs: "none", sm: "inline" } }}>
+            by{" "}
+            <Link
+              href="https://etke.cc/?utm_source=ketesa&utm_medium=footer&utm_campaign=ketesa"
+              target="_blank"
+              sx={{ color: "#f49300", fontWeight: 500 }}
+            >
+              etke.cc
+            </Link>
+          </Box>
+          <Link
+            sx={{ fontWeight: "bold", color: "inherit", display: { xs: "none", sm: "inline" }, ml: "auto" }}
+            href="https://matrix.to/#/#ketesa:etke.cc"
+            target="_blank"
+          >
+            {/* Matrix icon, trademark of The Matrix.org Foundation (https://matrix.org). Use of this logo does not imply endorsement or affiliation. */}
+            <Box
+              component="svg"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 520 520"
+              sx={{
+                width: "1rem",
+                height: "1rem",
+                display: "inline-block",
+                verticalAlign: "sub",
+                fill: "#FFFFFF",
+                mr: "4px",
+              }}
+            >
+              <title>
+                {
+                  "This logo is the trademark of The Matrix.org Foundation (https://matrix.org). Use of this logo does not imply endorsement or affiliation."
+                }
+              </title>
+              <path d="M13.7,11.9v496.2h35.7V520H0V0h49.4v11.9H13.7z" />
+              <path d="M166.3,169.2v25.1h0.7c6.7-9.6,14.8-17,24.2-22.2c9.4-5.3,20.3-7.9,32.5-7.9c11.7,0,22.4,2.3,32.1,6.8c9.7,4.5,17,12.6,22.1,24c5.5-8.1,13-15.3,22.4-21.5c9.4-6.2,20.6-9.3,33.5-9.3c9.8,0,18.9,1.2,27.3,3.6c8.4,2.4,15.5,6.2,21.5,11.5c6,5.3,10.6,12.1,14,20.6c3.3,8.5,5,18.7,5,30.7v124.1h-50.9V249.6c0-6.2-0.2-12.1-0.7-17.6c-0.5-5.5-1.8-10.3-3.9-14.3c-2.2-4.1-5.3-7.3-9.5-9.7c-4.2-2.4-9.9-3.6-17-3.6c-7.2,0-13,1.4-17.4,4.1c-4.4,2.8-7.9,6.3-10.4,10.8c-2.5,4.4-4.2,9.4-5,15.1c-0.8,5.6-1.3,11.3-1.3,17v103.3h-50.9v-104c0-5.5-0.1-10.9-0.4-16.3c-0.2-5.4-1.3-10.3-3.1-14.9c-1.8-4.5-4.8-8.2-9-10.9c-4.2-2.7-10.3-4.1-18.5-4.1c-2.4,0-5.6,0.5-9.5,1.6c-3.9,1.1-7.8,3.1-11.5,6.1c-3.7,3-6.9,7.3-9.5,12.9c-2.6,5.6-3.9,13-3.9,22.1v107.6h-50.9V169.2H166.3z" />
+              <path d="M506.3,508.1V11.9h-35.7V0H520v520h-49.4v-11.9H506.3z" />
+            </Box>
+            #ketesa:etke.cc
+          </Link>
+        </>
+      )}
     </Box>
   );
 };

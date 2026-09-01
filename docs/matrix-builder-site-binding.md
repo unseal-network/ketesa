@@ -6,12 +6,14 @@ This fork accepts a trusted site binding from the reverse proxy that serves the 
 {
   "siteBinding": {
     "siteId": "site_01J8MATRIX",
-    "homeserverUrl": "https://matrix.customer.example"
+    "homeserverUrl": "https://matrix.customer.example",
+    "serverName": "matrix.customer.example",
+    "appName": "Customer Chat"
   }
 }
 ```
 
-The `/admin` build loads that URL before rendering. A valid `siteBinding` becomes the only `restrictBaseUrl`, so Ketesa removes the homeserver input from the login page. The fork applies the binding again after `/.well-known/matrix/client` is loaded, preventing well-known settings from changing the request's target site or re-enabling the server picker.
+The `/admin` build loads that URL before rendering. A valid `siteBinding` becomes the only `restrictBaseUrl`, so Ketesa removes the homeserver input from the login page. The published app name becomes `{appName}后台` throughout the UI, and the footer identifies the site's server name instead of the Ketesa hosting platform. The fork applies the binding again after `/.well-known/matrix/client` is loaded, preventing well-known settings from changing the request's target site or re-enabling the server picker.
 
 The binding is resolved per HTTP request, not at container startup. One generic Ketesa deployment can therefore serve every Matrix site. It needs no control-plane token and no per-site environment variables; only the reverse proxy accesses its existing Host-to-site mapping.
 

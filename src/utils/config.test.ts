@@ -157,6 +157,8 @@ describe("config utils", () => {
             siteBinding: {
               siteId: "site_01J8MATRIX",
               homeserverUrl: "https://bound.example.org/",
+              serverName: "bound.example.org",
+              appName: "Bound Chat",
             },
           })
         )
@@ -174,6 +176,12 @@ describe("config utils", () => {
     await FetchConfig();
 
     expect(GetConfig().restrictBaseUrl).toBe("https://bound.example.org");
+    expect(GetConfig().siteBinding).toEqual({
+      siteId: "site_01J8MATRIX",
+      homeserverUrl: "https://bound.example.org/",
+      serverName: "bound.example.org",
+      appName: "Bound Chat",
+    });
     expect(global.fetch).toHaveBeenNthCalledWith(2, "https://bound.example.org/.well-known/matrix/client");
   });
 

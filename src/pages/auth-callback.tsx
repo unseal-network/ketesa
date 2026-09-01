@@ -6,6 +6,7 @@ import authProvider from "../providers/auth";
 import { FetchConfig, GetConfig } from "../utils/config";
 import { FetchInstanceConfig, GetInstanceConfig } from "../components/etke.cc/InstanceConfig";
 import createLogger from "../utils/logger";
+import { getSiteBranding } from "../utils/site-branding";
 
 const log = createLogger("auth-callback");
 
@@ -79,11 +80,11 @@ export const bootstrapAuthCallback = (
     await FetchConfig();
     await FetchInstanceConfig(GetConfig().etkeccAdmin, "");
     const icfg = GetInstanceConfig();
-    if (icfg.name) {
-      document.head.dataset.baseTitle = icfg.name;
-      if (!document.title.includes(icfg.name)) {
-        document.title = icfg.name;
-      }
+    const siteBranding = getSiteBranding(GetConfig().siteBinding);
+    const baseTitle = siteBranding?.adminName || icfg.name || "Ketesa";
+    document.head.dataset.baseTitle = baseTitle;
+    if (!document.title.includes(baseTitle)) {
+      document.title = baseTitle;
     }
     return runAuthCallback(provider);
   })()
