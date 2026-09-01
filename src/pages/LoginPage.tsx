@@ -172,7 +172,13 @@ const LoginPage = () => {
 
   return (
     <Form defaultValues={{ base_url: base_url }} onSubmit={handleSubmit} mode="onBlur">
-      <LoginFormBox backgroundUrl={backgroundUrl}>
+      <LoginFormBox
+        backgroundUrl={backgroundUrl}
+        sx={{
+          minHeight: "calc(100dvh - 40px)",
+          "& .card": { marginBottom: { xs: "2rem", sm: "2rem" } },
+        }}
+      >
         {!backgroundUrl && (
           <>
             <div className="login-orb login-orb-1" />
@@ -258,7 +264,7 @@ const LoginPage = () => {
       </LoginFormBox>
       <Notification />
       <EtkeAttribution>
-        <Footer />
+        <Footer placement="flow" />
       </EtkeAttribution>
     </Form>
   );

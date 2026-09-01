@@ -52,4 +52,16 @@ describe("Footer", () => {
     const img = document.querySelector("img");
     expect(img?.getAttribute("src")).toBe("./custom-logo.png");
   });
+
+  it("stays fixed by default for the authenticated admin layout", () => {
+    render(<Footer />, { wrapper });
+
+    expect(screen.getByRole("contentinfo")).toHaveStyle({ position: "fixed" });
+  });
+
+  it("can participate in page flow without covering login controls", () => {
+    render(<Footer placement="flow" />, { wrapper });
+
+    expect(screen.getByRole("contentinfo")).toHaveStyle({ position: "static" });
+  });
 });

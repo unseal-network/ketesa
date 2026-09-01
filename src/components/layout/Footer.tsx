@@ -2,9 +2,15 @@ import { Avatar, Box, Link } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
 import { useEffect, useState } from "react";
 
-const Footer = ({ logoSrc = "./images/logo.webp" }: { logoSrc?: string }) => {
+interface FooterProps {
+  logoSrc?: string;
+  placement?: "fixed" | "flow";
+}
+
+const Footer = ({ logoSrc = "./images/logo.webp", placement = "fixed" }: FooterProps) => {
   const [version, setVersion] = useState<string | null>(null);
   const theme = useTheme();
+  const isFixed = placement === "fixed";
 
   useEffect(() => {
     const version = document.getElementById("js-version")?.textContent;
@@ -17,9 +23,11 @@ const Footer = ({ logoSrc = "./images/logo.webp" }: { logoSrc?: string }) => {
     <Box
       component="footer"
       sx={{
-        position: "fixed",
-        zIndex: { xs: 1, sm: 100 },
-        bottom: 0,
+        position: isFixed ? "fixed" : "static",
+        zIndex: isFixed ? { xs: 1, sm: 100 } : 1,
+        bottom: isFixed ? 0 : "auto",
+        mt: isFixed ? 0 : "auto",
+        flexShrink: 0,
         width: "100%",
         bgcolor: theme.palette.mode === "dark" ? "#080D12" : "#334258",
         color: theme.palette.mode === "dark" ? "#E0E0E0" : "#FFFFFF",

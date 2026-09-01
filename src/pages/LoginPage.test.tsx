@@ -155,6 +155,12 @@ describe("LoginPage rendering", () => {
     expect(() => screen.getByRole("textbox", { name: auth.base_url })).toThrow();
   });
 
+  it("keeps the footer in document flow so it cannot cover login controls", () => {
+    renderSingleRestrict();
+
+    expect(screen.getByRole("contentinfo")).toHaveStyle({ position: "static" });
+  });
+
   it("renders the base URL combobox for multiple restricted homeservers", () => {
     render(
       <AppContext.Provider

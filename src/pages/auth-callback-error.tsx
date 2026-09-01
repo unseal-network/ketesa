@@ -57,7 +57,7 @@ const AuthCallbackErrorView = ({ message, onBack }: { message: string; onBack: (
         </CardActions>
       </Card>
       <EtkeAttribution>
-        <Footer logoSrc={footerLogoUrl} />
+        <Footer logoSrc={footerLogoUrl} placement="flow" />
       </EtkeAttribution>
     </LoginFormBox>
   );
