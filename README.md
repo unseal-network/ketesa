@@ -189,7 +189,7 @@ configuration is automatically written to `/.well-known/matrix/client` for you.
 
 [Full configuration reference](./docs/config.md)
 
-This Matrix Builder fork can resolve a deployment's homeserver from `MATRIX_SITE_ID`, `MATRIX_HOMESERVER_URL`, or `MATRIX_HOMESERVER_HOST` at container startup and remove the homeserver selector. See [Matrix Builder site binding](./docs/matrix-builder-site-binding.md).
+This Matrix Builder fork accepts a request-specific site binding from the reverse proxy, locks login to that homeserver, and removes the homeserver selector. See [Matrix Builder site binding](./docs/matrix-builder-site-binding.md).
 
 To inject a `config.json` into a Docker container, use a bind mount:
 

@@ -1,5 +1,5 @@
 import createLogger from "./logger";
-import { resolveSiteBinding, SiteBinding } from "./site-binding";
+import { resolveSiteBinding, SiteBinding, SiteBindingError } from "./site-binding";
 
 const log = createLogger("config");
 
@@ -60,22 +60,22 @@ export const FetchConfig = async () => {
     log.warn("config.json not found, using defaults", e);
   }
 
-  // siteBinding is deployment-owned. It is resolved before well-known so the
-  // correct server can supply its optional Ketesa settings, then enforced again
-  // afterwards so well-known cannot unlock or redirect a site-bound admin UI.
+  // siteBinding is injected by the trusted reverse proxy for the request Host.
+  // Resolve it before well-known so the correct server can supply its optional
+  // Ketesa settings, then enforce it again afterwards so well-known cannot
+  // unlock or redirect a site-bound admin UI.
   const siteBoundBaseUrl = resolveSiteBinding(deploymentConfig?.siteBinding);
+  if (!siteBoundBaseUrl) {
+    throw new SiteBindingError("a reverse-proxy-provided siteBinding is required");
+  }
   if (deploymentConfig) {
     LoadConfig(deploymentConfig);
   }
-  if (siteBoundBaseUrl) {
-    LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
-  }
+  LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
 
   await FetchWellKnownConfig();
 
-  if (siteBoundBaseUrl) {
-    LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
-  }
+  LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
 
   if (config.externalAuthProvider !== undefined) {
     SetExternalAuthProvider(config.externalAuthProvider);

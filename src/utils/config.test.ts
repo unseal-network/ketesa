@@ -148,7 +148,7 @@ describe("config utils", () => {
     expect((GetConfig().asManagedUsers[0] as RegExp).test("@wk:example.org")).toBe(true);
   });
 
-  it("enforces a deployment site binding after well-known configuration", async () => {
+  it("enforces a reverse-proxy site binding after well-known configuration", async () => {
     vi.mocked(fetch)
       .mockResolvedValueOnce(
         new Response(
@@ -174,5 +174,11 @@ describe("config utils", () => {
 
     expect(GetConfig().restrictBaseUrl).toBe("https://bound.example.org");
     expect(global.fetch).toHaveBeenNthCalledWith(2, "https://bound.example.org/.well-known/matrix/client");
+  });
+
+  it("fails closed when the reverse proxy does not provide a site binding", async () => {
+    vi.mocked(fetch).mockResolvedValueOnce(new Response("{}"));
+
+    await expect(FetchConfig()).rejects.toThrow("siteBinding is required");
   });
 });

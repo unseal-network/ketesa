@@ -28,16 +28,6 @@ ENV SERVER_HEALTH=true
 
 HEALTHCHECK --interval=30s --timeout=10s CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
-USER root
-
-RUN apk --no-cache add jq
-
-COPY ./docker/matrix-builder-entrypoint.sh /usr/local/bin/matrix-builder-entrypoint.sh
-
-RUN chmod 0755 /usr/local/bin/matrix-builder-entrypoint.sh
-
 USER $SERVER_USER_NAME:$SERVER_GROUP_NAME
 
 COPY --chown=$SERVER_USER_NAME:$SERVER_GROUP_NAME ./dist /home/$SERVER_USER_NAME/public
-
-ENTRYPOINT ["/usr/local/bin/matrix-builder-entrypoint.sh"]

@@ -1,38 +1,22 @@
-# Matrix Builder site binding
+# Matrix Builder reverse-proxy site binding
 
-This fork can bind one Ketesa deployment to one Matrix homeserver at container startup. A bound deployment keeps the homeserver field off the login page and re-applies the deployment binding after `/.well-known/matrix/client` is loaded, so well-known settings cannot turn the field back into a free-form input or a server picker.
+This fork accepts a trusted site binding from the reverse proxy that serves the current request. The proxy resolves the HTTP `Host` to a Matrix Builder site and returns a request-specific `/admin/config.json`:
 
-The container resolves the binding in this order:
-
-1. `MATRIX_HOMESERVER_URL` — an explicit homeserver origin.
-2. `MATRIX_HOMESERVER_HOST` — a hostname or customer CNAME; the container adds `https://`.
-3. `MATRIX_SITE_ID` — resolved server-side through the Matrix Builder control plane.
-
-For a Matrix Builder site, configure:
-
-```yaml
-environment:
-  MATRIX_SITE_ID: site_01J8MATRIX
-  MATRIX_CONTROL_PLANE_URL: https://control-plane.example.com
-  CONTROL_PLANE_API_KEY: ${CONTROL_PLANE_API_KEY}
+```json
+{
+  "siteBinding": {
+    "siteId": "site_01J8MATRIX",
+    "homeserverUrl": "https://matrix.customer.example"
+  }
+}
 ```
 
-At startup the container requests `GET /v1/matrix-sites/{siteId}`, reads `public_base_url`, and writes only this public binding to `/var/public/config.json`. The control-plane token remains in the container environment and is never written to the static files or sent to the browser.
+The `/admin` build loads that URL before rendering. A valid `siteBinding` becomes the only `restrictBaseUrl`, so Ketesa removes the homeserver input from the login page. The fork applies the binding again after `/.well-known/matrix/client` is loaded, preventing well-known settings from changing the request's target site or re-enabling the server picker.
 
-If the deployment system already knows the public hostname, it can avoid a control-plane request:
+The binding is resolved per HTTP request, not at container startup. One generic Ketesa deployment can therefore serve every Matrix site. It needs no control-plane token and no per-site environment variables; only the reverse proxy accesses its existing Host-to-site mapping.
 
-```yaml
-environment:
-  MATRIX_HOMESERVER_HOST: matrix.customer.example
-```
+This fork fails closed when the response does not contain a valid `siteBinding`; it never falls back to a user-editable homeserver field. The checked-in `public/config.json` binds local development to `http://localhost:8008`. Production reverse proxies must intercept `/admin/config.json` with the request-specific response above.
 
-For local verification only, loopback HTTP origins are accepted:
+The proxy response must be marked `Cache-Control: private, no-store` and `Vary: Host` so a shared cache cannot reuse one site's configuration for another Host. Remote homeserver URLs must use HTTPS and must be origins without credentials, paths, query parameters, or fragments.
 
-```yaml
-environment:
-  MATRIX_HOMESERVER_URL: http://127.0.0.1:8008
-```
-
-The container exits before starting the web server when the binding is missing, unsafe, or cannot be resolved. Remote homeservers must use HTTPS, and the URL must be an origin without credentials, a path, query parameters, or a fragment.
-
-DNS CNAME targets are not visible to browser JavaScript. Pass the customer-facing CNAME through `MATRIX_HOMESERVER_HOST`, or use `MATRIX_SITE_ID` so the control plane supplies the site's canonical `public_base_url`.
+Browser JavaScript cannot inspect the DNS CNAME chain. The authoritative mapping is the reverse proxy's resolved site record, specifically its immutable site ID and canonical `public_base_url`.

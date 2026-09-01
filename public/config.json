@@ -1,1 +1,5 @@
-{}
+{
+  "siteBinding": {
+    "homeserverUrl": "http://localhost:8008"
+  }
+}

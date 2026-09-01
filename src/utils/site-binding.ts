@@ -14,9 +14,9 @@ export class SiteBindingError extends Error {
 }
 
 /**
- * Validate the deployment-owned homeserver binding and return its canonical
- * origin. A binding is deliberately stricter than a user-entered URL: it must
- * be a single origin and remote deployments must use HTTPS.
+ * Validate the reverse-proxy-provided homeserver binding and return its
+ * canonical origin. A binding is deliberately stricter than a user-entered
+ * URL: it must be a single origin and remote deployments must use HTTPS.
  */
 export const resolveSiteBinding = (value: unknown): string | null => {
   if (value === undefined || value === null) {
