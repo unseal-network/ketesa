@@ -15,8 +15,8 @@ LABEL org.opencontainers.image.title="Ketesa" \
       org.opencontainers.image.description="Admin UI for Matrix servers, formerly Synapse Admin" \
       org.opencontainers.image.url="https://ketesa.app" \
       org.opencontainers.image.documentation="https://github.com/etkecc/ketesa#readme" \
-      org.opencontainers.image.source="https://github.com/etkecc/ketesa" \
-      org.opencontainers.image.vendor="etke.cc" \
+      org.opencontainers.image.source="https://github.com/unseal-network/ketesa" \
+      org.opencontainers.image.vendor="unseal.network" \
       org.opencontainers.image.authors="etke.cc" \
       org.opencontainers.image.licenses="Apache-2.0" \
       org.opencontainers.image.version="$VERSION" \
@@ -35,6 +35,16 @@ ENV SERVER_HEALTH=true
 
 HEALTHCHECK --interval=30s --timeout=10s CMD wget --no-verbose --tries=1 --spider http://localhost:8080/health || exit 1
 
+USER root
+
+RUN apk --no-cache add jq
+
+COPY ./docker/matrix-builder-entrypoint.sh /usr/local/bin/matrix-builder-entrypoint.sh
+
+RUN chmod 0755 /usr/local/bin/matrix-builder-entrypoint.sh
+
 USER $SERVER_USER_NAME:$SERVER_GROUP_NAME
 
 COPY --from=builder --chown=$SERVER_USER_NAME:$SERVER_GROUP_NAME /src/dist /home/$SERVER_USER_NAME/public
+
+ENTRYPOINT ["/usr/local/bin/matrix-builder-entrypoint.sh"]

@@ -1,5 +1,6 @@
 import {
   ClearConfig,
+  FetchConfig,
   FetchWellKnownConfig,
   GetConfig,
   LoadConfig,
@@ -145,5 +146,33 @@ describe("config utils", () => {
     expect(loaded).toBe(true);
     expect(global.fetch).toHaveBeenCalledWith("https://example.org/.well-known/matrix/client");
     expect((GetConfig().asManagedUsers[0] as RegExp).test("@wk:example.org")).toBe(true);
+  });
+
+  it("enforces a deployment site binding after well-known configuration", async () => {
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            siteBinding: {
+              siteId: "site_01J8MATRIX",
+              homeserverUrl: "https://bound.example.org/",
+            },
+          })
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            [WellKnownKey]: {
+              restrictBaseUrl: ["https://other.example.org", "https://another.example.org"],
+            },
+          })
+        )
+      );
+
+    await FetchConfig();
+
+    expect(GetConfig().restrictBaseUrl).toBe("https://bound.example.org");
+    expect(global.fetch).toHaveBeenNthCalledWith(2, "https://bound.example.org/.well-known/matrix/client");
   });
 });

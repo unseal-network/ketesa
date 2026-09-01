@@ -1,4 +1,5 @@
 import createLogger from "./logger";
+import { resolveSiteBinding, SiteBinding } from "./site-binding";
 
 const log = createLogger("config");
 
@@ -10,6 +11,10 @@ export interface Config {
   externalAuthProvider?: boolean;
   etkeccAdmin?: string;
   wellKnownDiscovery?: boolean;
+}
+
+interface DeploymentConfig extends Partial<Config> {
+  siteBinding?: SiteBinding;
 }
 
 export interface MenuItem {
@@ -46,16 +51,31 @@ export const FetchConfig = async () => {
   if (import.meta.env.BASE_URL) {
     configJSONUrl = `${import.meta.env.BASE_URL.replace(/\/?$/, "/")}config.json`;
   }
+  let deploymentConfig: DeploymentConfig | undefined;
   try {
     const resp = await fetch(configJSONUrl);
-    const configJSON = await resp.json();
+    deploymentConfig = (await resp.json()) as DeploymentConfig;
     log.debug("config.json loaded", { url: configJSONUrl });
-    LoadConfig(configJSON);
   } catch (e) {
     log.warn("config.json not found, using defaults", e);
   }
 
+  // siteBinding is deployment-owned. It is resolved before well-known so the
+  // correct server can supply its optional Ketesa settings, then enforced again
+  // afterwards so well-known cannot unlock or redirect a site-bound admin UI.
+  const siteBoundBaseUrl = resolveSiteBinding(deploymentConfig?.siteBinding);
+  if (deploymentConfig) {
+    LoadConfig(deploymentConfig);
+  }
+  if (siteBoundBaseUrl) {
+    LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
+  }
+
   await FetchWellKnownConfig();
+
+  if (siteBoundBaseUrl) {
+    LoadConfig({ restrictBaseUrl: siteBoundBaseUrl });
+  }
 
   if (config.externalAuthProvider !== undefined) {
     SetExternalAuthProvider(config.externalAuthProvider);
@@ -131,7 +151,7 @@ export const FetchWellKnownConfig = async () => {
 // load config from context
 // we deliberately processing each key separately to avoid overwriting the whole config, losing some keys, and messing
 // with typescript types
-export const LoadConfig = (context: Config) => {
+export const LoadConfig = (context: Partial<Config>) => {
   const nextConfig: Config = { ...config };
   let changed = false;
   if (context?.restrictBaseUrl) {
