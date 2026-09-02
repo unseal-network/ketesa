@@ -214,6 +214,10 @@ const AdminAppBar = () => {
 };
 
 const MAS_RESOURCE_PREFIX = "mas_";
+const HIDDEN_RESOURCE_MENU_ITEMS = new Set(["destinations"]);
+
+export const shouldShowResourceInMenu = (name: string, hasList?: boolean) =>
+  Boolean(hasList) && !name.startsWith(MAS_RESOURCE_PREFIX) && !HIDDEN_RESOURCE_MENU_ITEMS.has(name);
 
 /**
  * Renders resource menu items, excluding mas_* resources from the auto-list.
@@ -248,7 +252,7 @@ const ResourceMenuItems = () => {
   return (
     <>
       {Object.keys(resources)
-        .filter(name => !name.startsWith(MAS_RESOURCE_PREFIX) && resources[name].hasList)
+        .filter(name => shouldShowResourceInMenu(name, resources[name].hasList))
         .map(name => (
           <span key={name}>
             <ActiveResourceItem name={name} />

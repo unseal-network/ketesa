@@ -2,7 +2,7 @@ import { render, screen } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { axe } from "vitest-axe";
 
-import { AdminUserMenu, ActiveMenuItemLink, ActiveResourceItem } from "./AdminLayout";
+import { AdminUserMenu, ActiveMenuItemLink, ActiveResourceItem, shouldShowResourceInMenu } from "./AdminLayout";
 
 // ── react-router-dom mock ──────────────────────────────────────────────────────
 // useMatch is the only import used by the two components under test.
@@ -188,5 +188,17 @@ describe("ActiveResourceItem aria-current", () => {
     render(<ActiveResourceItem name="users" />);
     const link = screen.getByRole("link", { name: "users" });
     expect(link.getAttribute("aria-current")).toBeNull();
+  });
+});
+
+describe("resource menu visibility", () => {
+  it("hides destinations while leaving other list resources visible", () => {
+    expect(shouldShowResourceInMenu("destinations", true)).toBe(false);
+    expect(shouldShowResourceInMenu("users", true)).toBe(true);
+  });
+
+  it("keeps non-list and MAS resources out of the automatic menu", () => {
+    expect(shouldShowResourceInMenu("room_state", false)).toBe(false);
+    expect(shouldShowResourceInMenu("mas_users", true)).toBe(false);
   });
 });
