@@ -70,6 +70,7 @@ export const RegistrationTokenList = (props: ListProps) => {
           <NumberField
             source="uses_allowed"
             sortable={false}
+            emptyText="∞"
             label="resources.registration_tokens.fields.uses_allowed"
           />
           <NumberField source="pending" sortable={false} label="resources.registration_tokens.fields.pending" />
@@ -77,6 +78,7 @@ export const RegistrationTokenList = (props: ListProps) => {
           <DateField
             source="expiry_time"
             showTime
+            emptyText="∞"
             options={DATE_FORMAT}
             sortable={false}
             label="resources.registration_tokens.fields.expiry_time"

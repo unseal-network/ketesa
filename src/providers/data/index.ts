@@ -82,6 +82,7 @@ import {
 import { uploadMedia } from "../matrix";
 import { CACHED_MANY_REF, resourceMap } from "../../resourceMap";
 import { etkeProviderMethods } from "./etke";
+import { getCheckinRecords, getCheckinSettings, getCheckinUsers, setCheckinSettings } from "./checkin";
 import { SynapseDataProvider } from "../types";
 import { isSystemUser, getLocalpart } from "../../utils/mxid";
 import {
@@ -600,7 +601,7 @@ const baseDataProvider: SynapseDataProvider = {
       const sync = upd as { endpoint: string; method: string; body?: unknown };
       const options: { method: string; body?: string } = { method: sync.method };
       if (sync.method !== "GET" && "body" in sync) {
-        options.body = JSON.stringify(sync.body, filterNullValues);
+        options.body = res.preserveNull ? JSON.stringify(sync.body) : JSON.stringify(sync.body, filterNullValues);
       }
       const { json } = await jsonClient(baseUrl + sync.endpoint, options);
       return { data: res.map(json) };
@@ -637,7 +638,7 @@ const baseDataProvider: SynapseDataProvider = {
     const endpoint_url = baseUrl + create.endpoint;
     const { json } = await jsonClient(endpoint_url, {
       method: create.method,
-      body: JSON.stringify(create.body, filterNullValues),
+      body: res.preserveNull ? JSON.stringify(create.body) : JSON.stringify(create.body, filterNullValues),
     });
 
     // for some resources, the response is empty, so we return the adjusted input data as response
@@ -804,6 +805,10 @@ const baseDataProvider: SynapseDataProvider = {
   masFinishUserSession,
   getMASPolicyData,
   setMASPolicyData,
+  getCheckinSettings,
+  setCheckinSettings,
+  getCheckinUsers,
+  getCheckinRecords,
 
   ...etkeProviderMethods,
 };

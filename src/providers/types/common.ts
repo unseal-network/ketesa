@@ -72,7 +72,53 @@ export interface AdminClientConfig {
   return_policy_server_spammy_events: boolean;
 }
 
+export interface CheckinSettings {
+  points_per_checkin: number;
+}
+
+export interface CheckinUserSummary {
+  user_id: string;
+  total_points: number;
+  checkin_count: number;
+  current_streak: number;
+  longest_streak: number;
+  last_checkin: string;
+}
+
+export interface CheckinRecord {
+  user_id: string;
+  date: string;
+  points: number;
+  awarded_at: string;
+}
+
+export interface CheckinPage {
+  total: number;
+  from: number;
+  limit: number;
+}
+
+export interface CheckinUsersPage extends CheckinPage {
+  users: CheckinUserSummary[];
+}
+
+export interface CheckinRecordsPage extends CheckinPage {
+  records: CheckinRecord[];
+}
+
+export interface CheckinQuery {
+  from: number;
+  limit: number;
+  search?: string;
+  from_date?: string;
+  to_date?: string;
+}
+
 export interface SynapseDataProvider extends DataProvider {
+  getCheckinSettings: () => Promise<CheckinSettings>;
+  setCheckinSettings: (settings: CheckinSettings) => Promise<CheckinSettings>;
+  getCheckinUsers: (query: CheckinQuery) => Promise<CheckinUsersPage>;
+  getCheckinRecords: (query: CheckinQuery) => Promise<CheckinRecordsPage>;
   deleteMedia: (params: DeleteMediaParams) => Promise<DeleteMediaResult>;
   purgeRemoteMedia: (params: Pick<DeleteMediaParams, "before_ts">) => Promise<DeleteMediaResult>;
   uploadMedia: (params: UploadMediaParams) => Promise<UploadMediaResult>;

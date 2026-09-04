@@ -6,6 +6,8 @@ import ExtensionIcon from "@mui/icons-material/Extension";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
 import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import TranslateIcon from "@mui/icons-material/Translate";
+import EventAvailableIcon from "@mui/icons-material/EventAvailable";
+import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
 import { Box, Divider, ListItemIcon, ListItemText, MenuItem, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState, Suspense } from "react";
 import {
@@ -362,6 +364,18 @@ const AdminMenu = props => {
           primaryText="resources.mas_policy_data.name"
         />
       )}
+      <ActiveMenuItemLink
+        key="checkins"
+        to="/checkins"
+        leftIcon={<FactCheckOutlinedIcon aria-hidden />}
+        primaryText="resources.checkin_admin.name"
+      />
+      <ActiveMenuItemLink
+        key="checkin_settings"
+        to="/checkin_settings"
+        leftIcon={<EventAvailableIcon aria-hidden />}
+        primaryText="resources.checkin_settings.name"
+      />
       {etkeRoutesEnabled && !icfg.disabled.payments && (
         <ActiveMenuItemLink
           key="billing"

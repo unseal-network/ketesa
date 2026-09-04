@@ -3,6 +3,7 @@ import { SynapseTranslationMessages } from "../types";
 import common from "./common";
 import mas from "./mas";
 import misc_resources from "./misc_resources";
+import en_misc_resources from "../en/misc_resources";
 import reports from "./reports";
 import rooms from "./rooms";
 import user_reports from "./user_reports";
@@ -41,6 +42,8 @@ const pt: SynapseTranslationMessages = {
     memberships: misc_resources.memberships,
     room_members: misc_resources.room_members,
     destination_rooms: misc_resources.destination_rooms,
+    checkin_settings: misc_resources.checkin_settings,
+    checkin_admin: en_misc_resources.checkin_admin,
     ...mas,
   },
 };

@@ -222,6 +222,56 @@ const misc_resources = {
       },
     },
   },
+  checkin_settings: {
+    name: "签到设置",
+    description: "仅影响未来签到，历史积分不变。",
+    fields: {
+      points_per_checkin: "每次签到积分",
+      points_per_checkin_helper: "每次签到获得的积分数。",
+    },
+    validation: {
+      invalid: "请输入 0 到 1,000,000 之间的整数。",
+    },
+    action: {
+      save: "保存",
+      save_success: "签到设置已保存。",
+      save_failure: "保存签到设置失败。",
+      load_failure: "加载签到设置失败。",
+    },
+  },
+  checkin_admin: {
+    name: "签到管理",
+    description: "查看用户积分余额与不可变的签到积分明细。",
+    tabs: {
+      users: "用户积分",
+      records: "签到记录",
+    },
+    filters: {
+      user: "Matrix 用户 ID",
+      from_date: "开始日期",
+      to_date: "结束日期",
+      apply: "应用筛选",
+      reset: "重置",
+      invalid_date_range: "结束日期不能早于开始日期。",
+    },
+    fields: {
+      user_id: "用户",
+      total_points: "总积分",
+      checkin_count: "签到次数",
+      current_streak: "当前连续",
+      longest_streak: "最长连续",
+      last_checkin: "最近签到",
+      date: "签到日期",
+      points: "获得积分",
+      awarded_at: "记账时间",
+    },
+    action: {
+      view_records: "查看明细",
+      settings: "积分设置",
+    },
+    empty: "没有符合条件的签到数据。",
+    load_failure: "加载签到数据失败。",
+  },
   account_data: {
     name: "账户数据",
   },

@@ -55,14 +55,19 @@ export interface BaseRegistrationTokensResource {
   data: string;
   create: (params: RaRecord) => { endpoint: string; body: object; method: string };
   delete: (params: DeleteParams) => { endpoint: string; method?: string; body?: object };
+  /**
+   * Registration-token APIs use null as a meaningful value (unlimited uses or
+   * no expiry). The generic provider normally strips nulls for legacy APIs.
+   */
+  preserveNull?: boolean;
 }
 
 export interface RegistrationToken {
   token: string;
-  uses_allowed: number;
+  uses_allowed: number | null;
   pending: number;
   completed: number;
-  expiry_time?: number;
+  expiry_time?: number | null;
   // MAS-only fields
   created_at?: string;
   last_used_at?: string;
@@ -73,6 +78,7 @@ export interface SynapseRegistrationTokensResourceType extends BaseRegistrationT
   isMAS: false;
   map: (token: RegistrationToken) => object;
   total: (json: { registration_tokens: unknown[] }) => number;
+  update: (params: UpdateParams) => { endpoint: string; body: object; method: string };
 }
 
 export interface MASRegistrationTokensResourceType extends BaseRegistrationTokensResource {

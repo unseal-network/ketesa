@@ -226,6 +226,21 @@ const misc_resources = {
       },
     },
   },
+  checkin_settings: {
+    name: "Check-in settings",
+    description: "Only affects future check-ins; historical points remain unchanged.",
+    fields: {
+      points_per_checkin: "Points per check-in",
+      points_per_checkin_helper: "Number of points awarded for each check-in.",
+    },
+    validation: { invalid: "Enter a whole number from 0 to 1,000,000." },
+    action: {
+      save: "Save",
+      save_success: "Check-in settings saved.",
+      save_failure: "Failed to save check-in settings.",
+      load_failure: "Failed to load check-in settings.",
+    },
+  },
   account_data: {
     name: "Дані облікового запису",
   },

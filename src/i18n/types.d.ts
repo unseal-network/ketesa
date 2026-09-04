@@ -789,6 +789,56 @@ export interface SynapseTranslationMessages extends TranslationMessages {
     destination_rooms: {
       name: string;
     };
+    checkin_settings?: {
+      name: string;
+      description: string;
+      fields: {
+        points_per_checkin: string;
+        points_per_checkin_helper: string;
+      };
+      validation: {
+        invalid: string;
+      };
+      action: {
+        save: string;
+        save_success: string;
+        save_failure: string;
+        load_failure: string;
+      };
+    };
+    checkin_admin?: {
+      name: string;
+      description: string;
+      tabs: {
+        users: string;
+        records: string;
+      };
+      filters: {
+        user: string;
+        from_date: string;
+        to_date: string;
+        apply: string;
+        reset: string;
+        invalid_date_range: string;
+      };
+      fields: {
+        user_id: string;
+        total_points: string;
+        checkin_count: string;
+        current_streak: string;
+        longest_streak: string;
+        last_checkin: string;
+        date: string;
+        points: string;
+        awarded_at: string;
+      };
+      action: {
+        view_records: string;
+        settings: string;
+      };
+      empty: string;
+      load_failure: string;
+    };
     mas_users: {
       name: string;
       fields: {

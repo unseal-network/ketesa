@@ -1,4 +1,4 @@
-import { DeleteParams, Identifier, RaRecord, fetchUtils } from "react-admin";
+import { DeleteParams, Identifier, RaRecord, UpdateParams, fetchUtils } from "react-admin";
 import {
   DatabaseRoomStatistic,
   Destination,
@@ -48,16 +48,47 @@ export const invalidateManyRefCache = (pattern: string) => {
 export const synapseRegistrationTokensResource: SynapseRegistrationTokensResourceType = {
   path: "/_synapse/admin/v1/registration_tokens",
   isMAS: false,
+  preserveNull: true,
   map: (rt: RegistrationToken) => ({ ...rt, id: rt.token }),
   data: "registration_tokens",
   total: json => json.registration_tokens.length,
-  create: (params: RaRecord) => ({
-    endpoint: "/_synapse/admin/v1/registration_tokens/new",
-    body: params,
-    method: "POST",
-  }), // Synapse accepts Unix timestamps as-is
+  create: (params: RaRecord) => {
+    // An empty token means "generate one" to the UI, but Synapse treats an
+    // explicitly supplied empty string as invalid. Null is meaningful for the
+    // other optional fields and must reach the native API unchanged.
+    const body: Record<string, unknown> = {
+      uses_allowed: params.uses_allowed === "" || params.uses_allowed === undefined ? null : params.uses_allowed,
+      expiry_time: params.expiry_time === "" || params.expiry_time === undefined ? null : params.expiry_time,
+    };
+    if (params.token) {
+      body.token = params.token;
+    } else if (params.length !== "" && params.length !== undefined && params.length !== null) {
+      body.length = params.length;
+    }
+    return {
+      endpoint: "/_synapse/admin/v1/registration_tokens/new",
+      body,
+      method: "POST",
+    };
+  }, // Synapse accepts Unix timestamps as-is
+  update: (params: UpdateParams) => {
+    const body: Record<string, unknown> = {};
+    if (Object.prototype.hasOwnProperty.call(params.data, "uses_allowed")) {
+      body.uses_allowed =
+        params.data.uses_allowed === "" || params.data.uses_allowed === undefined ? null : params.data.uses_allowed;
+    }
+    if (Object.prototype.hasOwnProperty.call(params.data, "expiry_time")) {
+      body.expiry_time =
+        params.data.expiry_time === "" || params.data.expiry_time === undefined ? null : params.data.expiry_time;
+    }
+    return {
+      endpoint: `/_synapse/admin/v1/registration_tokens/${encodeURIComponent(params.id)}`,
+      body,
+      method: "PUT",
+    };
+  },
   delete: (params: DeleteParams) => ({
-    endpoint: `/_synapse/admin/v1/registration_tokens/${params.id}`,
+    endpoint: `/_synapse/admin/v1/registration_tokens/${encodeURIComponent(params.id)}`,
   }),
 };
 

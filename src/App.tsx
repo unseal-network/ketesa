@@ -17,6 +17,8 @@ import UserImport from "./components/user-import/UserImport";
 import DonatePage from "./pages/DonatePage";
 import LoginPage from "./pages/LoginPage";
 import MASPolicyDataPage from "./pages/MASPolicyDataPage";
+import CheckinSettingsPage from "./pages/CheckinSettingsPage";
+import CheckinAdminPage from "./pages/CheckinAdminPage";
 import { DatabaseRoomStatsList } from "./resources/statistics";
 import destinations from "./resources/destinations";
 import registrationToken from "./resources/registration-tokens";
@@ -92,6 +94,8 @@ export const App = ({ i18nProvider }: { i18nProvider: I18nProvider }) => {
           {!icfg.disabled.support && <Route path="/support" element={<SupportPage />} />}
           {!icfg.disabled.support && <Route path="/support/:id" element={<SupportRequestPage />} />}
           {masEnabled && <Route path="/mas_policy_data" element={<MASPolicyDataPage />} />}
+          <Route path="/checkins" element={<CheckinAdminPage />} />
+          <Route path="/checkin_settings" element={<CheckinSettingsPage />} />
           <Route path="/database_room_statistics" element={<DatabaseRoomStatsList />} />
         </CustomRoutes>
         <Resource {...users} />

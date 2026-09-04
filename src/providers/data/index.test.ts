@@ -4,7 +4,7 @@ vi.mock("../matrix", async () => ({
 }));
 
 import dataProvider from "./index";
-import { clearSystemUsersScanCache, clearReverseSearchScanCache } from "./index";
+import { clearSystemUsersScanCache, clearReverseSearchScanCache, initResources } from "./index";
 import { LoadConfig } from "../../utils/config";
 
 beforeEach(() => {
@@ -97,6 +97,90 @@ describe("dataProvider", () => {
     expect(user.data.displayname).toEqual("User");
     expect(user.data.creation_ts_ms).toEqual(1560432506000);
     expect(fetch).toHaveBeenCalledTimes(1);
+  });
+
+  it("manages Synapse registration tokens through the native resource API", async () => {
+    // A previous MAS test can leave the module-level resource map on its MAS
+    // variant, so explicitly restore the Synapse resource for this contract test.
+    initResources();
+    vi.mocked(fetch)
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({
+            registration_tokens: [
+              { token: "unlimited", uses_allowed: null, pending: 2, completed: 3, expiry_time: null },
+              { token: "disabled", uses_allowed: 0, pending: 1, completed: 4, expiry_time: null },
+            ],
+          })
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ token: "unlimited", uses_allowed: null, pending: 2, completed: 3, expiry_time: null })
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ token: "generated", uses_allowed: null, pending: 0, completed: 0, expiry_time: null })
+        )
+      )
+      .mockResolvedValueOnce(
+        new Response(
+          JSON.stringify({ token: "unlimited", uses_allowed: null, pending: 2, completed: 3, expiry_time: null })
+        )
+      )
+      .mockResolvedValueOnce(new Response(JSON.stringify({})));
+
+    const listed = await dataProvider.getList("registration_tokens", {
+      pagination: { page: 1, perPage: 50 },
+      sort: { field: "token", order: "ASC" },
+      filter: { valid: false },
+    });
+    const listURL = vi.mocked(fetch).mock.calls[0]?.[0] as string;
+    expect(listURL).toContain("/_synapse/admin/v1/registration_tokens");
+    expect(listURL).toContain("valid=false");
+    expect(listed.data).toEqual([
+      {
+        id: "unlimited",
+        token: "unlimited",
+        uses_allowed: null,
+        pending: 2,
+        completed: 3,
+        expiry_time: null,
+      },
+      { id: "disabled", token: "disabled", uses_allowed: 0, pending: 1, completed: 4, expiry_time: null },
+    ]);
+    expect(listed.total).toBe(2);
+
+    const one = await dataProvider.getOne("registration_tokens", { id: "unlimited" });
+    expect(one.data.id).toBe("unlimited");
+    expect(one.data.pending).toBe(2);
+    expect(one.data.completed).toBe(3);
+
+    await dataProvider.create("registration_tokens", {
+      data: { token: "", length: "", uses_allowed: null, expiry_time: null },
+    });
+    const createBody = JSON.parse((vi.mocked(fetch).mock.calls[2]?.[1] as RequestInit).body as string);
+    expect(createBody).toEqual({ uses_allowed: null, expiry_time: null });
+
+    await dataProvider.update("registration_tokens", {
+      id: "unlimited",
+      previousData: { token: "unlimited", uses_allowed: 5, expiry_time: Date.now() + 60_000 },
+      data: { token: "unlimited", pending: 2, completed: 3, uses_allowed: null, expiry_time: null },
+    });
+    const updateRequest = vi.mocked(fetch).mock.calls[3];
+    expect(updateRequest?.[0]).toContain("/_synapse/admin/v1/registration_tokens/unlimited");
+    expect(JSON.parse((updateRequest?.[1] as RequestInit).body as string)).toEqual({
+      uses_allowed: null,
+      expiry_time: null,
+    });
+
+    await dataProvider.delete("registration_tokens", {
+      id: "unlimited",
+      previousData: { id: "unlimited", token: "unlimited" },
+    });
+    expect(vi.mocked(fetch).mock.calls[4]?.[0]).toContain("/_synapse/admin/v1/registration_tokens/unlimited");
+    expect((vi.mocked(fetch).mock.calls[4]?.[1] as RequestInit).method).toBe("DELETE");
   });
 
   it("keeps Synapse list creation_ts values in milliseconds", async () => {

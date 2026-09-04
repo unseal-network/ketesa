@@ -228,6 +228,56 @@ const misc_resources = {
       },
     },
   },
+  checkin_settings: {
+    name: "Check-in settings",
+    description: "Only affects future check-ins; historical points remain unchanged.",
+    fields: {
+      points_per_checkin: "Points per check-in",
+      points_per_checkin_helper: "Number of points awarded for each check-in.",
+    },
+    validation: {
+      invalid: "Enter a whole number from 0 to 1,000,000.",
+    },
+    action: {
+      save: "Save",
+      save_success: "Check-in settings saved.",
+      save_failure: "Failed to save check-in settings.",
+      load_failure: "Failed to load check-in settings.",
+    },
+  },
+  checkin_admin: {
+    name: "Check-ins",
+    description: "Review user point balances and the immutable check-in ledger.",
+    tabs: {
+      users: "User points",
+      records: "Check-in records",
+    },
+    filters: {
+      user: "Matrix user ID",
+      from_date: "From date",
+      to_date: "To date",
+      apply: "Apply filters",
+      reset: "Reset",
+      invalid_date_range: "The end date must not be before the start date.",
+    },
+    fields: {
+      user_id: "User",
+      total_points: "Total points",
+      checkin_count: "Check-ins",
+      current_streak: "Current streak",
+      longest_streak: "Longest streak",
+      last_checkin: "Last check-in",
+      date: "Check-in date",
+      points: "Points awarded",
+      awarded_at: "Recorded at",
+    },
+    action: {
+      view_records: "View records",
+      settings: "Point settings",
+    },
+    empty: "No matching check-in data.",
+    load_failure: "Failed to load check-in data.",
+  },
   account_data: {
     name: "Account data",
   },
