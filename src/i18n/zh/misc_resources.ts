@@ -197,7 +197,7 @@ const misc_resources = {
     action: { reconnect: "重新连接" },
   },
   registration_tokens: {
-    name: "注册令牌",
+    name: "邀请码",
     fields: {
       token: "令牌",
       valid: "有效令牌",
