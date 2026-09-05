@@ -199,8 +199,8 @@ const misc_resources = {
   registration_tokens: {
     name: "邀请码",
     fields: {
-      token: "令牌",
-      valid: "有效令牌",
+      token: "邀请码",
+      valid: "有效邀请码",
       uses_allowed: "允许使用次数",
       pending: "待处理",
       completed: "已完成",
@@ -210,15 +210,15 @@ const misc_resources = {
       last_used_at: "最后使用时间",
       revoked_at: "撤销时间",
     },
-    helper: { length: "如果未提供令牌，则为生成令牌的长度。" },
+    helper: { length: "如果未提供邀请码，则为生成邀请码的长度。" },
     action: {
       revoke: {
         label: "撤销",
-        success: "令牌已撤销",
+        success: "邀请码已撤销",
       },
       unrevoke: {
         label: "恢复",
-        success: "令牌已恢复",
+        success: "邀请码已恢复",
       },
     },
   },
