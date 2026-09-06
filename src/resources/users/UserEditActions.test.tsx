@@ -10,7 +10,7 @@ vi.mock("../../providers/data/mas", async () => {
   return { ...actual, useIsMAS: () => masMode };
 });
 
-import { UserEditActions } from "./UserEditActions";
+import { UserEditActions } from "./index";
 
 const i18nProvider = polyglotI18nProvider(() => englishMessages, "en");
 const dataProvider = {

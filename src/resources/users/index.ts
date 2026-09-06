@@ -3,6 +3,8 @@ import { ResourceProps } from "react-admin";
 
 export { UserList } from "./List";
 export { UserEdit } from "./Edit";
+export { stripRestrictedUserEditFields } from "./Edit";
+export { UserEditActions } from "./UserEditActions";
 export { UserCreate } from "./Create";
 
 import { UserList } from "./List";

@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 
-import { stripRestrictedUserEditFields } from "./Edit";
+import { stripRestrictedUserEditFields } from "./index";
 
 describe("existing-user edit restrictions", () => {
   it("preserves ordinary edits while dropping password and contact mutations", () => {
