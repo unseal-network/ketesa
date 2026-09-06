@@ -5,7 +5,6 @@ import DevicesIcon from "@mui/icons-material/Devices";
 import DocumentScannerIcon from "@mui/icons-material/DocumentScanner";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import LockClockIcon from "@mui/icons-material/LockClock";
-import ManageAccountsIcon from "@mui/icons-material/ManageAccounts";
 import NotificationsIcon from "@mui/icons-material/Notifications";
 import PermMediaIcon from "@mui/icons-material/PermMedia";
 import PersonPinIcon from "@mui/icons-material/PersonPin";
@@ -15,10 +14,8 @@ import ViewListIcon from "@mui/icons-material/ViewList";
 import AdminPanelSettingsIcon from "@mui/icons-material/AdminPanelSettings";
 import BlockIcon from "@mui/icons-material/Block";
 import DeleteForeverIcon from "@mui/icons-material/DeleteForever";
-import DeleteIcon from "@mui/icons-material/Delete";
 import LockIcon from "@mui/icons-material/Lock";
 import NoAccountsIcon from "@mui/icons-material/NoAccounts";
-import VisibilityIcon from "@mui/icons-material/Visibility";
 import VisibilityOffIcon from "@mui/icons-material/VisibilityOff";
 import {
   Box,
@@ -43,8 +40,6 @@ import {
   TextField as MuiTextField,
   Typography,
 } from "@mui/material";
-import IconButton from "@mui/material/IconButton";
-import InputAdornment from "@mui/material/InputAdornment";
 import { useTheme } from "@mui/material/styles";
 import useMediaQuery from "@mui/material/useMediaQuery";
 import { useEffect, useState } from "react";
@@ -80,7 +75,6 @@ import {
   TextInput,
   Toolbar,
   ToolbarClasses,
-  TopToolbar,
   WrapperField,
   useDataProvider,
   useGetList,
@@ -92,26 +86,20 @@ import {
   useRefresh,
   useTranslate,
   Link,
-  Confirm,
   useListContext,
 } from "react-admin";
 import { useFormContext } from "react-hook-form";
 
 import { MakeAdminBtn, RoomBulkActionButtons } from "../rooms";
+import { UserEditActions } from "./UserEditActions";
 import AvatarField from "../../components/users/fields/AvatarField";
 import EditableAvatarField from "../../components/users/fields/EditableAvatarField";
 import DeleteUserButton from "../../components/users/buttons/DeleteUserButton";
 import DangerZoneSaveButton from "../../components/users/buttons/DangerZoneSaveButton";
-import { AllowCrossSigningButton } from "../../components/users/buttons/AllowCrossSigningButton";
 import DeviceCreateButton from "../../components/users/buttons/DeviceCreateButton";
-import { RenewAccountValidityButton } from "../../components/users/buttons/RenewAccountValidityButton";
-import { useIsMAS } from "../../providers/data/mas";
 import DeviceDisplayNameInput from "../../components/users/DeviceDisplayNameInput";
 import DeviceRemoveButton, { DeviceBulkRemoveButton } from "../../components/users/buttons/DeviceRemoveButton";
 import ExperimentalFeaturesList from "../../components/users/ExperimentalFeatures";
-import { LoginAsUserButton } from "../../components/users/buttons/LoginAsUserButton";
-import { ResetPasswordButton } from "../../components/users/buttons/ResetPasswordButton";
-import { ServerNoticeButton } from "../../components/users/ServerNotices";
 import UserAccountData from "../../components/users/UserAccountData";
 import UserInfoChips from "../../components/users/UserCounts";
 import UserRateLimits from "../../components/users/UserRateLimits";
@@ -156,77 +144,10 @@ export const validateUser = [required(), maxLength(253), regex(/^[a-z0-9._=\-+/]
 
 export const validateAddress = [required(), maxLength(255)];
 
-// Set MAS password; used in the toolbar when in MAS mode
-const MASSetPasswordButton = () => {
-  const record = useRecordContext();
-  const [loading, setLoading] = useState(false);
-  const [open, setOpen] = useState(false);
-  const [password, setPassword] = useState("");
-  const [showPassword, setShowPassword] = useState(false);
-  const notify = useNotify();
-  const dataProvider = useDataProvider() as SynapseDataProvider;
-  const translate = useTranslate();
-
-  if (!record?.mas_id) return null;
-
-  const handleConfirm = async () => {
-    if (!password) return;
-    setOpen(false);
-    setLoading(true);
-    try {
-      const result = await dataProvider.masSetPassword(record.mas_id as string, password);
-      if (result.success) {
-        notify("resources.mas_users.action.set_password.success");
-        setPassword("");
-      } else {
-        notify(result.error || "resources.mas_users.action.set_password.failure", { type: "error" });
-      }
-    } catch {
-      notify("resources.mas_users.action.set_password.failure", { type: "error" });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  return (
-    <>
-      <Button label="resources.mas_users.action.set_password.label" onClick={() => setOpen(true)} disabled={loading}>
-        <ManageAccountsIcon />
-      </Button>
-      <Confirm
-        isOpen={open}
-        title={translate("resources.mas_users.action.set_password.title")}
-        content={
-          <MuiTextField
-            type={showPassword ? "text" : "password"}
-            label={translate("resources.mas_users.action.set_password.label")}
-            value={password}
-            onChange={e => setPassword(e.target.value)}
-            autoComplete="new-password"
-            fullWidth
-            autoFocus
-            slotProps={{
-              input: {
-                endAdornment: (
-                  <InputAdornment position="end">
-                    <IconButton onClick={() => setShowPassword(v => !v)} edge="end">
-                      {showPassword ? <VisibilityOffIcon /> : <VisibilityIcon />}
-                    </IconButton>
-                  </InputAdornment>
-                ),
-              },
-            }}
-          />
-        }
-        onConfirm={handleConfirm}
-        onClose={() => {
-          setOpen(false);
-          setPassword("");
-          setShowPassword(false);
-        }}
-      />
-    </>
-  );
+/** Fields that must never be written while editing an existing user. */
+export const stripRestrictedUserEditFields = (data: Record<string, unknown>) => {
+  const { password: _password, threepids: _threepids, ...editableFields } = data;
+  return editableFields;
 };
 
 // MAS sessions panel: sub-tabbed, shown in the Sessions tab of the user profile in MAS mode
@@ -623,50 +544,16 @@ const MASUpstreamOAuthLinksPanel = () => {
 // MAS email management panel: replaces the Synapse 3PIDs tab in MAS mode
 const MASEmailsPanel = () => {
   const record = useRecordContext();
-  const dataProvider = useDataProvider();
-  const notify = useNotify();
-  const translate = useTranslate();
   const locale = useLocale();
   const theme = useTheme();
   const isSmall = useMediaQuery(theme.breakpoints.down("sm"));
-  const [newEmail, setNewEmail] = useState("");
-  const [adding, setAdding] = useState(false);
   const masId = record?.mas_id as string | undefined;
 
-  const {
-    data: emails,
-    isLoading,
-    refetch,
-  } = useGetList(
+  const { data: emails, isLoading } = useGetList(
     "mas_user_emails",
     { filter: { user_id: masId }, pagination: { page: 1, perPage: 50 }, sort: { field: "created_at", order: "DESC" } },
     { enabled: !!masId }
   );
-
-  const handleDelete = async (emailId: string) => {
-    try {
-      await dataProvider.delete("mas_user_emails", { id: emailId, previousData: { id: emailId } });
-      notify("resources.mas_user_emails.action.remove.success");
-      refetch();
-    } catch {
-      notify("ra.notification.http_error", { type: "error" });
-    }
-  };
-
-  const handleAdd = async () => {
-    if (!newEmail || !masId) return;
-    setAdding(true);
-    try {
-      await dataProvider.create("mas_user_emails", { data: { user_id: masId, email: newEmail } });
-      notify("resources.mas_user_emails.action.create.success");
-      setNewEmail("");
-      refetch();
-    } catch {
-      notify("ra.notification.http_error", { type: "error" });
-    } finally {
-      setAdding(false);
-    }
-  };
 
   if (isLoading) return <Loading />;
 
@@ -675,19 +562,7 @@ const MASEmailsPanel = () => {
       {isSmall ? (
         <MuiList disablePadding>
           {(emails || []).map(email => (
-            <ListItem
-              key={String(email.id)}
-              secondaryAction={
-                <Button
-                  label="resources.mas_user_emails.action.remove.label"
-                  onClick={() => handleDelete(String(email.id))}
-                  size="small"
-                  color="error"
-                >
-                  <DeleteIcon />
-                </Button>
-              }
-            >
+            <ListItem key={String(email.id)}>
               <ListItemText
                 primary={String(email.email)}
                 secondary={new Date(String(email.created_at)).toLocaleString(locale, DATE_FORMAT)}
@@ -707,70 +582,9 @@ const MASEmailsPanel = () => {
         >
           <TextField source="email" sortable={false} />
           <DateField source="created_at" showTime sortable={false} />
-          <WrapperField label="resources.mas_user_emails.fields.actions">
-            <FunctionField
-              render={(emailRecord: { id: string }) => (
-                <Button
-                  label="resources.mas_user_emails.action.remove.label"
-                  onClick={() => handleDelete(emailRecord.id)}
-                  color="error"
-                >
-                  <DeleteIcon />
-                </Button>
-              )}
-            />
-          </WrapperField>
         </Datagrid>
       )}
-      <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-        <MuiTextField
-          label={translate("resources.mas_user_emails.fields.email")}
-          value={newEmail}
-          onChange={e => setNewEmail(e.target.value)}
-          size="small"
-        />
-        <Button
-          label="ra.action.add"
-          onClick={handleAdd}
-          disabled={adding || !newEmail}
-          variant="contained"
-          sx={{ height: "40px" }}
-        />
-      </Box>
     </Box>
-  );
-};
-
-const UserEditActions = () => {
-  const record = useRecordContext();
-  const isMAS = useIsMAS();
-  const ownUserId = localStorage.getItem("user_id");
-  let ownUserIsSelected = false;
-  let systemUserIsSelected = false;
-  if (record && record.id) {
-    ownUserIsSelected = record.id === ownUserId;
-    systemUserIsSelected = isSystemUser(record.id);
-  }
-
-  return (
-    <TopToolbar sx={{ flexWrap: "wrap", gap: 0.5, whiteSpace: "normal" }}>
-      {!record?.deactivated && !isMAS && <LoginAsUserButton />}
-      {!record?.deactivated && !isMAS && <ResetPasswordButton />}
-      {!record?.deactivated && isMAS && <MASSetPasswordButton />}
-      {!record?.deactivated && !isMAS && <AllowCrossSigningButton />}
-      {!record?.deactivated && !isMAS && <RenewAccountValidityButton />}
-      {!record?.deactivated && <ServerNoticeButton />}
-      {record && record.id && (
-        <UserPreventSelfDelete ownUserIsSelected={ownUserIsSelected} systemUserIsSelected={systemUserIsSelected}>
-          <DeleteUserButton
-            selectedIds={[record?.id]}
-            confirmTitle="resources.users.helper.erase"
-            confirmContent="resources.users.helper.erase_text"
-            masIdMap={record?.mas_id ? { [String(record.id)]: String(record.mas_id) } : undefined}
-          />
-        </UserPreventSelfDelete>
-      )}
-    </TopToolbar>
   );
 };
 
@@ -1024,6 +838,7 @@ export const UserEdit = (props: EditProps) => {
       {...props}
       title={<UserTitle />}
       actions={<UserEditActions />}
+      transform={stripRestrictedUserEditFields}
       mutationMode="pessimistic"
       redirect="edit"
       queryOptions={{
@@ -1058,11 +873,6 @@ export const UserEdit = (props: EditProps) => {
                 <TextInput source="id" readOnly fullWidth />
                 <TextInput source="displayname" fullWidth />
                 <SelectInput source="user_type" choices={choices_type} translateChoice={false} resettable fullWidth />
-                <UserPasswordInput
-                  source="password"
-                  autoComplete="new-password"
-                  helperText="resources.users.helper.password"
-                />
               </Box>
             </Box>
           )}
@@ -1199,12 +1009,12 @@ export const UserEdit = (props: EditProps) => {
           {isMAS() ? (
             <MASEmailsPanel />
           ) : (
-            <ArrayInput source="threepids">
-              <SimpleFormIterator disableReordering>
-                <SelectInput source="medium" choices={choices_medium} />
-                <TextInput source="address" />
-              </SimpleFormIterator>
-            </ArrayInput>
+            <ArrayField source="threepids" label="">
+              <Datagrid bulkActionButtons={false} rowClick={false} empty={<EmptyState resource="users" />}>
+                <TextField source="medium" sortable={false} />
+                <TextField source="address" sortable={false} />
+              </Datagrid>
+            </ArrayField>
           )}
         </FormTab>
 
