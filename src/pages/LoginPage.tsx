@@ -18,6 +18,7 @@ import { useInstanceConfig } from "../components/etke.cc/InstanceConfig";
 import { Footer, LoginFormBox } from "../components/layout";
 import { LoginButtons } from "../components/login/LoginButtons";
 import { LoginFormSections } from "../components/login/LoginFormSections";
+import { SiteAdminLogin } from "../components/login/SiteAdminLogin";
 import { LoginMethod } from "../components/login/types";
 import { useLoginProbe } from "../components/login/useLoginProbe";
 import createLogger from "../utils/logger";
@@ -100,6 +101,14 @@ const LoginPage = () => {
   const { state: probeState, start } = useLoginProbe(base_url || undefined);
 
   useEffect(() => {
+    if (siteBinding) {
+      if (loginToken) {
+        const cleanUrl = new URL(window.location.toString());
+        cleanUrl.searchParams.delete("loginToken");
+        window.history.replaceState({}, "", cleanUrl.toString());
+      }
+      return;
+    }
     if (!loginToken) {
       return;
     }
@@ -128,7 +137,7 @@ const LoginPage = () => {
         log.error("login with token failed", error);
       });
     }
-  }, [loginToken, login]);
+  }, [loginToken, login, siteBinding]);
 
   const handleSubmit = (auth: { base_url?: string; [key: string]: unknown }) => {
     setLoading(true);
@@ -171,6 +180,10 @@ const LoginPage = () => {
   }
   if (icfg.background_url) {
     backgroundUrl = icfg.background_url;
+  }
+
+  if (siteBinding) {
+    return <SiteAdminLogin siteBinding={siteBinding} welcomeTo={welcomeTo} />;
   }
 
   return (

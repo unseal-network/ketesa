@@ -14,6 +14,36 @@ import { ClearConfig, FetchWellKnownConfig, GetConfig, SetExternalAuthProvider }
 import { decodeURLComponent } from "../../utils/safety";
 import { MatrixError, displayError } from "../../utils/error";
 import { fetchAuthenticatedMedia } from "../../utils/fetchMedia";
+import { getAdmin2FASession } from "../admin2fa";
+
+interface Admin2FAFinalOptions {
+  challengeId: string;
+  deviceId: string;
+}
+
+interface LoginArgs {
+  base_url: string;
+  username?: string;
+  password?: string;
+  loginToken?: string;
+  accessToken?: string;
+  clientUrl?: string;
+  authMetadata?: AuthMetadata;
+  admin2fa?: Admin2FAFinalOptions;
+}
+
+const revokeUnpersistedToken = async (baseUrl: string, token: string) => {
+  try {
+    await fetch(`${baseUrl}/_matrix/client/v3/logout`, {
+      method: "POST",
+      credentials: GetConfig().corsCredentials as RequestCredentials,
+      headers: { Accept: "application/json", Authorization: `Bearer ${token}` },
+    });
+  } catch {
+    // The token was never persisted locally. A failed best-effort revoke does
+    // not change the assurance decision.
+  }
+};
 
 const authProvider: AuthProvider = {
   // called when the user attempts to log in
@@ -25,15 +55,8 @@ const authProvider: AuthProvider = {
     accessToken,
     clientUrl,
     authMetadata,
-  }: {
-    base_url: string;
-    username: string;
-    password: string;
-    loginToken: string;
-    accessToken: string;
-    clientUrl: string;
-    authMetadata: AuthMetadata;
-  }) => {
+    admin2fa,
+  }: LoginArgs) => {
     // use the base_url from login instead of the well_known entry from the
     // server, since the admin might want to access the admin API via some
     // private address
@@ -44,7 +67,8 @@ const authProvider: AuthProvider = {
       throw new Error("Homeserver URL is required.");
     }
     base_url = base_url.replace(/\/+$/g, "");
-    localStorage.setItem("base_url", base_url);
+    const siteAdminFinal = Boolean(GetConfig().siteBinding && admin2fa);
+    if (!siteAdminFinal) localStorage.setItem("base_url", base_url);
 
     log.info("login", {
       base_url,
@@ -52,7 +76,7 @@ const authProvider: AuthProvider = {
     });
 
     const decoded_base_url = decodeURLComponent(base_url);
-    localStorage.setItem("decoded_base_url", decoded_base_url);
+    if (!siteAdminFinal) localStorage.setItem("decoded_base_url", decoded_base_url);
 
     if (clientUrl && authMetadata) {
       // this is a OIDC login
@@ -86,7 +110,7 @@ const authProvider: AuthProvider = {
       body: JSON.stringify(
         Object.assign(
           {
-            device_id: localStorage.getItem("device_id"),
+            device_id: admin2fa?.deviceId || localStorage.getItem("device_id"),
             initial_device_display_name: deviceName,
           },
           loginToken
@@ -110,6 +134,7 @@ const authProvider: AuthProvider = {
       decoded_base_url + (accessToken ? "/_matrix/client/v3/account/whoami" : "/_matrix/client/v3/login");
 
     let response;
+    let unpersistedAdminToken: string | undefined;
 
     try {
       if (accessToken) {
@@ -125,6 +150,24 @@ const authProvider: AuthProvider = {
       response = await fetchUtils.fetchJson(login_api_url, options);
       const json = response.json;
 
+      if (siteAdminFinal) {
+        const token = json.access_token;
+        if (typeof token !== "string") {
+          throw new Error("Admin session did not return the expected device");
+        }
+        if (!admin2fa?.challengeId || json.device_id !== admin2fa.deviceId) {
+          await revokeUnpersistedToken(base_url, token);
+          throw new Error("Admin session did not return the expected device");
+        }
+        unpersistedAdminToken = token;
+        try {
+          await getAdmin2FASession(base_url, token);
+        } catch (assuranceError) {
+          await revokeUnpersistedToken(base_url, token);
+          throw assuranceError;
+        }
+      }
+
       // just split(":")[1] is not enough, because there are homeservers with ports or IPv6 addresses,
       // like "@user:example.com:8008" or "@user:[2001:db8::1]"
       // home_server is deprecated in the login response (Matrix spec), so always extract from user_id
@@ -132,8 +175,11 @@ const authProvider: AuthProvider = {
       mxidParts?.shift();
       const homeServer = mxidParts?.join(":");
       if (!homeServer) {
+        if (unpersistedAdminToken) await revokeUnpersistedToken(base_url, unpersistedAdminToken);
         throw new Error(`Cannot determine home_server from user_id: ${json.user_id}`);
       }
+      localStorage.setItem("base_url", base_url);
+      localStorage.setItem("decoded_base_url", decoded_base_url);
       localStorage.setItem("home_server", homeServer);
       localStorage.setItem("user_id", json.user_id);
       localStorage.setItem("access_token", accessToken ? accessToken : json.access_token);
@@ -358,6 +404,22 @@ const authProvider: AuthProvider = {
       return Promise.reject();
     }
 
+    const config = GetConfig();
+    if (config.siteBinding) {
+      const baseUrl = localStorage.getItem("base_url");
+      if (!baseUrl) {
+        ClearConfig();
+        return Promise.reject();
+      }
+      try {
+        await getAdmin2FASession(baseUrl, access_token);
+      } catch (error) {
+        log.warn("checkAuth: site admin assurance missing, clearing session", error);
+        ClearConfig();
+        return Promise.reject();
+      }
+    }
+
     // Ensure server versions are fetched (handles page reload)
     fetchServerVersions();
 
@@ -376,6 +438,21 @@ const authProvider: AuthProvider = {
         const refreshSuccess = await refreshAccessToken();
 
         if (refreshSuccess) {
+          if (config.siteBinding) {
+            const refreshedToken = localStorage.getItem("access_token");
+            const refreshedBaseUrl = localStorage.getItem("base_url");
+            if (!refreshedToken || !refreshedBaseUrl) {
+              ClearConfig();
+              return Promise.reject();
+            }
+            try {
+              await getAdmin2FASession(refreshedBaseUrl, refreshedToken);
+            } catch (error) {
+              log.warn("checkAuth: refreshed Site Admin token lacks assurance", error);
+              ClearConfig();
+              return Promise.reject();
+            }
+          }
           log.debug("checkAuth: token refreshed");
           return Promise.resolve();
         } else {

@@ -1,4 +1,5 @@
 import russianMessages from "./base";
+import englishCommon from "../en/common";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const common: Record<string, any> = {
@@ -536,5 +537,8 @@ const common: Record<string, any> = {
     },
   },
 };
+
+common.ketesa.auth.admin2fa = englishCommon.ketesa.auth.admin2fa;
+common.ketesa.security = englishCommon.ketesa.security;
 
 export default common;

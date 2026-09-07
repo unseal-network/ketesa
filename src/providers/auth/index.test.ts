@@ -27,6 +27,7 @@ import { HttpError } from "ra-core";
 import authProvider from "./index";
 import { initResources } from "../data";
 import { UserManager } from "oidc-client-ts";
+import { LoadConfig } from "../../utils/config";
 
 describe("authProvider", () => {
   beforeEach(() => {
@@ -256,6 +257,84 @@ describe("authProvider", () => {
       if (authProvider.getPermissions) {
         await expect(authProvider.getPermissions(null)).resolves.toBeUndefined();
       }
+    });
+  });
+
+  it("rejects a pre-existing Site Admin token without 2FA assurance", async () => {
+    LoadConfig({
+      siteBinding: { siteId: "site_old_token", homeserverUrl: "https://site.example" },
+      corsCredentials: "same-origin",
+    });
+    localStorage.setItem("base_url", "https://site.example");
+    localStorage.setItem("access_token", "old-admin-token");
+    vi.mocked(fetch).mockResolvedValueOnce(new Response(JSON.stringify({ authorized: false, factor_count: 0 })));
+
+    await expect(authProvider.checkAuth?.({})).rejects.toBeUndefined();
+    expect(localStorage.getItem("access_token")).toBeNull();
+    expect(localStorage.getItem("base_url")).toBeNull();
+  });
+
+  describe("Site Admin 2FA final login", () => {
+    it("uses the challenge device, checks assurance before persistence, then initializes the session", async () => {
+      LoadConfig({
+        siteBinding: { siteId: "site_test", homeserverUrl: "https://site.example" },
+        corsCredentials: "same-origin",
+      });
+      vi.mocked(fetch)
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({
+              user_id: "@admin:site.example",
+              access_token: "admin-token",
+              device_id: "challenge-device",
+            })
+          )
+        )
+        .mockResolvedValueOnce(new Response(JSON.stringify({ authorized: true, factor_count: 1 })))
+        .mockResolvedValueOnce(new Response(JSON.stringify({})));
+
+      await expect(
+        authProvider.login({
+          base_url: "https://site.example",
+          username: "@admin:site.example",
+          password: "in-memory",
+          admin2fa: { challengeId: "challenge-1", deviceId: "challenge-device" },
+        })
+      ).resolves.toEqual({ redirectTo: "/" });
+
+      const loginCall = vi.mocked(fetch).mock.calls[0];
+      expect(loginCall[0]).toBe("https://site.example/_matrix/client/v3/login");
+      expect(JSON.parse(String((loginCall[1] as RequestInit).body)).device_id).toBe("challenge-device");
+      expect(vi.mocked(fetch).mock.calls[1][0]).toBe("https://site.example/_synapse/client/site/v1/admin-2fa/session");
+      expect(localStorage.getItem("base_url")).toBe("https://site.example");
+      expect(localStorage.getItem("decoded_base_url")).toBe("https://site.example");
+      expect(localStorage.getItem("access_token")).toBe("admin-token");
+    });
+
+    it("revokes an unassured token and leaves storage empty", async () => {
+      vi.mocked(fetch)
+        .mockResolvedValueOnce(
+          new Response(
+            JSON.stringify({ user_id: "@admin:site.example", access_token: "unsafe-token", device_id: "device" })
+          )
+        )
+        .mockResolvedValueOnce(new Response(JSON.stringify({ assurance: false })))
+        .mockResolvedValueOnce(new Response(JSON.stringify({})));
+
+      await expect(
+        authProvider.login({
+          base_url: "https://site.example",
+          username: "@admin:site.example",
+          password: "in-memory",
+          admin2fa: { challengeId: "challenge-2", deviceId: "device" },
+        })
+      ).rejects.toBeDefined();
+
+      expect(localStorage.getItem("access_token")).toBeNull();
+      expect(localStorage.getItem("base_url")).toBeNull();
+      expect(localStorage.getItem("decoded_base_url")).toBeNull();
+      expect(localStorage.getItem("user_id")).toBeNull();
+      expect(vi.mocked(fetch).mock.calls[2][0]).toBe("https://site.example/_matrix/client/v3/logout");
     });
   });
 });

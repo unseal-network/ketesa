@@ -1,6 +1,7 @@
 import GavelIcon from "@mui/icons-material/Gavel";
 import InfoOutlinedIcon from "@mui/icons-material/InfoOutlined";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
+import SecurityIcon from "@mui/icons-material/Security";
 import ManageHistoryIcon from "@mui/icons-material/ManageHistory";
 import ExtensionIcon from "@mui/icons-material/Extension";
 import VolunteerActivismIcon from "@mui/icons-material/VolunteerActivism";
@@ -131,6 +132,27 @@ const ProfileMenuItem = () => {
   );
 };
 
+const AccountSecurityMenuItem = () => {
+  const translate = useTranslate();
+  const userMenu = useUserMenu();
+  const { siteBinding } = useAppContext();
+  if (!siteBinding) return null;
+  return (
+    <MenuItem
+      dense
+      onClick={() => {
+        userMenu?.onClose?.();
+        window.location.hash = "/account_security";
+      }}
+    >
+      <ListItemIcon>
+        <SecurityIcon fontSize="small" />
+      </ListItemIcon>
+      <ListItemText>{translate("ketesa.security.menu_label")}</ListItemText>
+    </MenuItem>
+  );
+};
+
 const DonateMenuItem = () => {
   const translate = useTranslate();
   const userMenu = useUserMenu();
@@ -182,6 +204,7 @@ export const AdminUserMenu = () => {
     <UserMenu>
       <ServerVersionItems />
       <ProfileMenuItem />
+      <AccountSecurityMenuItem />
       <Divider sx={{ my: 0.5 }} />
       <AdminClientConfigItems />
       <LocaleMenuItems />

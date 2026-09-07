@@ -8,6 +8,7 @@ import pt from "./pt";
 import ru from "./ru";
 import uk from "./uk";
 import zh from "./zh";
+import zhTW from "./zh-TW";
 
 const locales = {
   de,
@@ -19,6 +20,7 @@ const locales = {
   ru,
   uk,
   zh,
+  "zh-TW": zhTW,
 };
 
 const isPlainObject = (value: unknown): value is Record<string, unknown> => {

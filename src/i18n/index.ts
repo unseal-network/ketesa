@@ -4,7 +4,7 @@ import { resolveBrowserLocale } from "react-admin";
 
 import type { SynapseTranslationMessages } from "./types";
 
-const supportedLocales = ["en", "de", "fa", "fr", "it", "ja", "pt", "ru", "uk", "zh"] as const;
+const supportedLocales = ["en", "de", "fa", "fr", "it", "ja", "pt", "ru", "uk", "zh", "zh-TW"] as const;
 type SupportedLocale = (typeof supportedLocales)[number];
 
 const localeLabels: { locale: SupportedLocale; name: string }[] = [
@@ -18,6 +18,7 @@ const localeLabels: { locale: SupportedLocale; name: string }[] = [
   { locale: "ru", name: "Русский" },
   { locale: "uk", name: "Українська" },
   { locale: "zh", name: "简体中文" },
+  { locale: "zh-TW", name: "繁體中文" },
 ];
 
 const loaders: Record<SupportedLocale, () => Promise<SynapseTranslationMessages>> = {
@@ -31,6 +32,7 @@ const loaders: Record<SupportedLocale, () => Promise<SynapseTranslationMessages>
   ru: () => import("./ru").then(m => m.default),
   uk: () => import("./uk").then(m => m.default),
   zh: () => import("./zh").then(m => m.default),
+  "zh-TW": () => import("./zh-TW").then(m => m.default),
 };
 
 // Read locale directly from react-admin's localStorage store because this runs
