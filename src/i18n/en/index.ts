@@ -43,6 +43,7 @@ const en: SynapseTranslationMessages = {
     destination_rooms: misc_resources.destination_rooms,
     checkin_settings: misc_resources.checkin_settings,
     checkin_admin: misc_resources.checkin_admin,
+    password_help_requests: misc_resources.password_help_requests,
     ...mas,
   },
 };

@@ -114,11 +114,42 @@ export interface CheckinQuery {
   to_date?: string;
 }
 
+export type PasswordHelpRequestStatus = "PENDING" | "RESOLVED" | "DISMISSED";
+
+export interface PasswordHelpRequest {
+  id: string;
+  user_id: string;
+  status: PasswordHelpRequestStatus;
+  first_requested_at: string;
+  last_requested_at: string;
+  request_count: number;
+  resolved_at: string | null;
+  resolved_by: string | null;
+}
+
+export interface PasswordHelpRequestsPage {
+  requests: PasswordHelpRequest[];
+  total: number;
+  from: number;
+  limit: number;
+}
+
+export interface PasswordHelpRequestsQuery {
+  from: number;
+  limit: number;
+  status?: PasswordHelpRequestStatus;
+}
+
 export interface SynapseDataProvider extends DataProvider {
   getCheckinSettings: () => Promise<CheckinSettings>;
   setCheckinSettings: (settings: CheckinSettings) => Promise<CheckinSettings>;
   getCheckinUsers: (query: CheckinQuery) => Promise<CheckinUsersPage>;
   getCheckinRecords: (query: CheckinQuery) => Promise<CheckinRecordsPage>;
+  getPasswordHelpRequests: (query: PasswordHelpRequestsQuery) => Promise<PasswordHelpRequestsPage>;
+  updatePasswordHelpRequest: (
+    requestId: string,
+    status: Exclude<PasswordHelpRequestStatus, "PENDING">
+  ) => Promise<PasswordHelpRequest>;
   deleteMedia: (params: DeleteMediaParams) => Promise<DeleteMediaResult>;
   purgeRemoteMedia: (params: Pick<DeleteMediaParams, "before_ts">) => Promise<DeleteMediaResult>;
   uploadMedia: (params: UploadMediaParams) => Promise<UploadMediaResult>;

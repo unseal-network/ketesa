@@ -839,6 +839,34 @@ export interface SynapseTranslationMessages extends TranslationMessages {
       empty: string;
       load_failure: string;
     };
+    password_help_requests?: {
+      name: string;
+      description: string;
+      pending_count: string;
+      status: {
+        pending: string;
+        resolved: string;
+        dismissed: string;
+      };
+      fields: {
+        user_id: string;
+        first_requested_at: string;
+        last_requested_at: string;
+        request_count: string;
+        status: string;
+        actions: string;
+      };
+      action: {
+        open_user: string;
+        resolve: string;
+        dismiss: string;
+        resolve_success: string;
+        dismiss_success: string;
+        update_failure: string;
+      };
+      empty: string;
+      load_failure: string;
+    };
     mas_users: {
       name: string;
       fields: {

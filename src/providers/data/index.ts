@@ -83,6 +83,7 @@ import { uploadMedia } from "../matrix";
 import { CACHED_MANY_REF, resourceMap } from "../../resourceMap";
 import { etkeProviderMethods } from "./etke";
 import { getCheckinRecords, getCheckinSettings, getCheckinUsers, setCheckinSettings } from "./checkin";
+import { getPasswordHelpRequests, updatePasswordHelpRequest } from "./passwordHelp";
 import { SynapseDataProvider } from "../types";
 import { isSystemUser, getLocalpart } from "../../utils/mxid";
 import {
@@ -809,6 +810,8 @@ const baseDataProvider: SynapseDataProvider = {
   setCheckinSettings,
   getCheckinUsers,
   getCheckinRecords,
+  getPasswordHelpRequests,
+  updatePasswordHelpRequest,
 
   ...etkeProviderMethods,
 };

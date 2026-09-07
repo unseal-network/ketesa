@@ -50,6 +50,7 @@ import { BillingStatusBadge, BillingStatusPoller } from "../etke.cc/BillingStatu
 import { isMAS } from "../../providers/data/mas";
 import { useAppContext } from "../../Context";
 import { getSiteBranding } from "../../utils/site-branding";
+import { PasswordHelpRequestsBadge } from "../../pages/PasswordHelpRequestsPage";
 
 const ServerVersionItems = () => {
   const serverVersions = useServerVersions();
@@ -375,6 +376,12 @@ const AdminMenu = props => {
         to="/checkin_settings"
         leftIcon={<EventAvailableIcon aria-hidden />}
         primaryText="resources.checkin_settings.name"
+      />
+      <ActiveMenuItemLink
+        key="password_help_requests"
+        to="/password_help_requests"
+        leftIcon={<PasswordHelpRequestsBadge />}
+        primaryText="resources.password_help_requests.name"
       />
       {etkeRoutesEnabled && !icfg.disabled.payments && (
         <ActiveMenuItemLink

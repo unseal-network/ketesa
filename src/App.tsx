@@ -19,6 +19,7 @@ import LoginPage from "./pages/LoginPage";
 import MASPolicyDataPage from "./pages/MASPolicyDataPage";
 import CheckinSettingsPage from "./pages/CheckinSettingsPage";
 import CheckinAdminPage from "./pages/CheckinAdminPage";
+import PasswordHelpRequestsPage from "./pages/PasswordHelpRequestsPage";
 import { DatabaseRoomStatsList } from "./resources/statistics";
 import destinations from "./resources/destinations";
 import registrationToken from "./resources/registration-tokens";
@@ -96,6 +97,7 @@ export const App = ({ i18nProvider }: { i18nProvider: I18nProvider }) => {
           {masEnabled && <Route path="/mas_policy_data" element={<MASPolicyDataPage />} />}
           <Route path="/checkins" element={<CheckinAdminPage />} />
           <Route path="/checkin_settings" element={<CheckinSettingsPage />} />
+          <Route path="/password_help_requests" element={<PasswordHelpRequestsPage />} />
           <Route path="/database_room_statistics" element={<DatabaseRoomStatsList />} />
         </CustomRoutes>
         <Resource {...users} />

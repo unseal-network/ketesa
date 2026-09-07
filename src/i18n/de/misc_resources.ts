@@ -239,6 +239,35 @@ const misc_resources = {
       load_failure: "Failed to load check-in settings.",
     },
   },
+  password_help_requests: {
+    name: "Password help requests",
+    description:
+      "A request identifies an account, but does not verify the requester. Verify identity through your existing support channel before updating the password.",
+    pending_count: "%{smart_count} pending password help request |||| %{smart_count} pending password help requests",
+    status: {
+      pending: "Pending",
+      resolved: "Resolved",
+      dismissed: "Dismissed",
+    },
+    fields: {
+      user_id: "User",
+      first_requested_at: "First requested",
+      last_requested_at: "Last requested",
+      request_count: "Requests",
+      status: "Status",
+      actions: "Actions",
+    },
+    action: {
+      open_user: "Open user",
+      resolve: "Mark resolved",
+      dismiss: "Dismiss",
+      resolve_success: "Password help request marked as resolved.",
+      dismiss_success: "Password help request dismissed.",
+      update_failure: "Failed to update password help request.",
+    },
+    empty: "No password help requests.",
+    load_failure: "Failed to load password help requests.",
+  },
   account_data: {
     name: "Kontodaten",
   },
