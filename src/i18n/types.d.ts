@@ -687,6 +687,26 @@ export interface SynapseTranslationMessages extends TranslationMessages {
         media_length: string;
       };
     };
+    statistics: {
+      name: string;
+      description: string;
+      actions: { refresh: string; apply: string };
+      filters: { from: string; to: string; half_open: string };
+      range: string;
+      generated: string;
+      loading: string;
+      disabled: string;
+      status: { complete: string; partial: string; unavailable: string };
+      errors: { permission: string; load: string };
+      metrics: {
+        registrations: { label: string; description: string };
+        sync_activity: { label: string; description: string };
+        message_activity: { label: string; description: string };
+        group_activity: { label: string; description: string };
+      };
+      trend: { title: string; description: string; date: string; unknown: string };
+      coverage: { title: string; description: string; unavailable: string; unknown_rooms: string };
+    };
     forward_extremities: {
       name: string;
       fields: {

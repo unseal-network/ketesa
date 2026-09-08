@@ -31,6 +31,7 @@ const uk: SynapseTranslationMessages = {
     servernotices: misc_resources.servernotices,
     database_room_statistics: misc_resources.database_room_statistics,
     user_media_statistics: misc_resources.user_media_statistics,
+    statistics: misc_resources.statistics,
     forward_extremities: misc_resources.forward_extremities,
     room_state: misc_resources.room_state,
     room_media: misc_resources.room_media,

@@ -20,6 +20,7 @@ import MASPolicyDataPage from "./pages/MASPolicyDataPage";
 import CheckinSettingsPage from "./pages/CheckinSettingsPage";
 import CheckinAdminPage from "./pages/CheckinAdminPage";
 import PasswordHelpRequestsPage from "./pages/PasswordHelpRequestsPage";
+import StatisticsPage from "./pages/StatisticsPage";
 import AccountSecurityPage from "./pages/AccountSecurityPage";
 import { DatabaseRoomStatsList } from "./resources/statistics";
 import destinations from "./resources/destinations";
@@ -99,6 +100,7 @@ export const App = ({ i18nProvider }: { i18nProvider: I18nProvider }) => {
           <Route path="/checkins" element={<CheckinAdminPage />} />
           <Route path="/checkin_settings" element={<CheckinSettingsPage />} />
           <Route path="/password_help_requests" element={<PasswordHelpRequestsPage />} />
+          <Route path="/statistics" element={<StatisticsPage />} />
           {siteBinding && <Route path="/account_security" element={<AccountSecurityPage />} />}
           <Route path="/database_room_statistics" element={<DatabaseRoomStatsList />} />
         </CustomRoutes>

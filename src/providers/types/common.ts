@@ -3,6 +3,7 @@ import type { DataProvider, Identifier } from "react-admin";
 import type { AccountDataModel, ExperimentalFeaturesModel, RateLimitsModel, UsernameAvailabilityResult } from "./users";
 import type { EventContextResult, RoomHierarchyResult, RoomMessagesResult } from "./rooms";
 import type { MASPolicyData } from "./mas";
+import type { StatisticsReport, StatisticsReportQuery } from "./statistics";
 import type {
   ComponentsResponse,
   InvoiceEmails,
@@ -141,6 +142,7 @@ export interface PasswordHelpRequestsQuery {
 }
 
 export interface SynapseDataProvider extends DataProvider {
+  getStatisticsReport: (query?: StatisticsReportQuery) => Promise<StatisticsReport>;
   getCheckinSettings: () => Promise<CheckinSettings>;
   setCheckinSettings: (settings: CheckinSettings) => Promise<CheckinSettings>;
   getCheckinUsers: (query: CheckinQuery) => Promise<CheckinUsersPage>;

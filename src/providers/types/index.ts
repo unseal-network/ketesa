@@ -6,3 +6,4 @@ export * from "./user-reports";
 export * from "./destinations";
 export * from "./etke";
 export * from "./common";
+export * from "./statistics";

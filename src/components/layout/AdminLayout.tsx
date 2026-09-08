@@ -9,6 +9,7 @@ import SupportAgentIcon from "@mui/icons-material/SupportAgent";
 import TranslateIcon from "@mui/icons-material/Translate";
 import EventAvailableIcon from "@mui/icons-material/EventAvailable";
 import FactCheckOutlinedIcon from "@mui/icons-material/FactCheckOutlined";
+import AssessmentOutlinedIcon from "@mui/icons-material/AssessmentOutlined";
 import { Box, Divider, ListItemIcon, ListItemText, MenuItem, Typography, useMediaQuery, useTheme } from "@mui/material";
 import { useEffect, useState, Suspense } from "react";
 import {
@@ -405,6 +406,12 @@ const AdminMenu = props => {
         to="/password_help_requests"
         leftIcon={<PasswordHelpRequestsBadge />}
         primaryText="resources.password_help_requests.name"
+      />
+      <ActiveMenuItemLink
+        key="statistics"
+        to="/statistics"
+        leftIcon={<AssessmentOutlinedIcon aria-hidden />}
+        primaryText="resources.statistics.name"
       />
       {etkeRoutesEnabled && !icfg.disabled.payments && (
         <ActiveMenuItemLink

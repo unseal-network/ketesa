@@ -1,4 +1,37 @@
 const misc_resources = {
+  statistics: {
+    name: "Statistics",
+    description: "Review server activity for a selected date range.",
+    actions: { refresh: "Refresh", apply: "Apply" },
+    filters: { from: "From", to: "To", half_open: "The end date is exclusive." },
+    range: "Range: %{from} to %{to} · %{timezone}",
+    generated: "Updated %{value}",
+    loading: "Loading statistics",
+    disabled: "Statistics collection is disabled.",
+    status: { complete: "Complete", partial: "Partial", unavailable: "Not collected" },
+    errors: {
+      permission: "You do not have permission to view statistics.",
+      load: "Statistics are temporarily unavailable.",
+    },
+    metrics: {
+      registrations: { label: "New registrations", description: "Accounts recorded in the range." },
+      sync_activity: { label: "Sync active users", description: "Users with accepted Sync activity." },
+      message_activity: { label: "Message users", description: "Users with message-class activity." },
+      group_activity: { label: "Active group rooms", description: "Group rooms with message activity." },
+    },
+    trend: {
+      title: "Daily trend",
+      description: "Daily facts from the same report snapshot.",
+      date: "Date",
+      unknown: "Unknown rooms",
+    },
+    coverage: {
+      title: "Coverage and integrity",
+      description: "A dash means the source did not cover that date.",
+      unavailable: "Not collected",
+      unknown_rooms: "%{count} active room(s) could not be classified.",
+    },
+  },
   scheduled_tasks: {
     name: "Запланированная задача |||| Запланированные задачи",
     fields: {

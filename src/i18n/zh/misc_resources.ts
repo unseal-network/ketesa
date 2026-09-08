@@ -1,4 +1,29 @@
 const misc_resources = {
+  statistics: {
+    name: "统计",
+    description: "查看所选日期范围内的站点活动。",
+    actions: { refresh: "刷新", apply: "应用" },
+    filters: { from: "开始日期", to: "结束日期", half_open: "结束日期不包含在范围内。" },
+    range: "范围：%{from} 至 %{to} · %{timezone}",
+    generated: "更新于 %{value}",
+    loading: "正在加载统计",
+    disabled: "统计采集已关闭。",
+    status: { complete: "完整", partial: "部分", unavailable: "未采集" },
+    errors: { permission: "你没有查看统计的权限。", load: "统计暂时不可用。" },
+    metrics: {
+      registrations: { label: "新注册人数", description: "范围内记录的账号。" },
+      sync_activity: { label: "Sync 活跃人数", description: "有确认 Sync 活动的用户。" },
+      message_activity: { label: "发言人数", description: "有消息类活动的用户。" },
+      group_activity: { label: "活跃群聊", description: "有消息活动的群聊。" },
+    },
+    trend: { title: "每日趋势", description: "来自同一份统计快照的每日事实。", date: "日期", unknown: "未知房间" },
+    coverage: {
+      title: "覆盖与完整性",
+      description: "短横线表示该日期没有采集覆盖。",
+      unavailable: "未采集",
+      unknown_rooms: "%{count} 个活跃房间无法分类。",
+    },
+  },
   scheduled_tasks: {
     name: "计划任务 |||| 计划任务",
     fields: {
