@@ -39,6 +39,8 @@ describe("auth-callback entrypoint", () => {
   }, 15000);
 
   it("shows error and does not redirect on failure", async () => {
+    vi.doUnmock("../utils/config");
+    vi.doUnmock("../components/etke.cc/InstanceConfig");
     vi.doMock("../utils/config", async () => ({
       __esModule: true,
       ...(await vi.importActual("../utils/config")),
@@ -116,6 +118,9 @@ describe("auth-callback entrypoint", () => {
       return { redirectTo: "/" };
     });
 
+    vi.doUnmock("../utils/config");
+    vi.doUnmock("../components/etke.cc/InstanceConfig");
+    vi.doUnmock("../providers/auth");
     vi.doMock("../utils/config", async () => ({
       __esModule: true,
       ...(await vi.importActual("../utils/config")),
