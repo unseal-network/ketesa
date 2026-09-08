@@ -83,7 +83,7 @@ export const FetchConfig = async () => {
 
 export const FetchWellKnownConfig = async (boundBaseUrl?: string) => {
   let protocol = "https";
-  let homeserver: string | null = null;
+  let homeserver: string | null;
 
   if (boundBaseUrl) {
     const boundURL = new URL(boundBaseUrl);
