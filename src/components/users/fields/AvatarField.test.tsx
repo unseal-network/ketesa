@@ -8,7 +8,7 @@ describe("AvatarField", () => {
   beforeEach(() => {
     // Mock fetch
     global.fetch = vi.fn(() =>
-      Promise.resolve(new Response(new Blob(["mock image data"], { type: "image/jpeg" })))
+      Promise.resolve(new Response("mock image data", { headers: { "Content-Type": "image/jpeg" } }))
     ) as unknown as typeof fetch;
 
     // Mock URL.createObjectURL
