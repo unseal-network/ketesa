@@ -1,18 +1,23 @@
 import { execSync } from "node:child_process";
 
 export function resolveVersion(): string {
+  const configuredVersion = process.env.KETESA_VERSION || process.env.SYNAPSE_ADMIN_VERSION;
+  if (configuredVersion) {
+    return configuredVersion;
+  }
+
   try {
-    return execSync(
-      'git describe --tags || git rev-parse --short HEAD || echo "${KETESA_VERSION:-${SYNAPSE_ADMIN_VERSION:-unknown}}"',
-      { encoding: "utf8", shell: "/bin/sh" }
-    ).trim();
+    return execSync('git describe --tags || git rev-parse --short HEAD || echo "unknown"', {
+      encoding: "utf8",
+      shell: "/bin/sh",
+    }).trim();
   } catch (e) {
     const stdout = e instanceof Error && "stdout" in e ? String(e.stdout || "").trim() : "";
     if (stdout) {
       return stdout;
     }
     console.error("[version] failed to resolve version", e);
-    return process.env.KETESA_VERSION || process.env.SYNAPSE_ADMIN_VERSION || "unknown";
+    return "unknown";
   }
 }
 

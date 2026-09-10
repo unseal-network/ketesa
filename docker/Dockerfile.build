@@ -1,7 +1,11 @@
 FROM node:lts AS builder
 ARG BASE_PATH=./
+ARG VERSION=dev
+ARG VCS_REF=unknown
 WORKDIR /src
 COPY . /src
+ENV KETESA_VERSION=$VERSION
+ENV SYNAPSE_ADMIN_VERSION=$VERSION
 RUN yarn config set enableTelemetry 0 && \
     yarn install --immutable --network-timeout=300000 --pure-lockfile && \
     NODE_ENV=production yarn build --base=$BASE_PATH
