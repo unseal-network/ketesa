@@ -83,7 +83,7 @@ export interface CheckinUserSummary {
   checkin_count: number;
   current_streak: number;
   longest_streak: number;
-  last_checkin: string;
+  last_checkin: string | null;
 }
 
 export interface CheckinRecord {
@@ -105,6 +105,23 @@ export interface CheckinUsersPage extends CheckinPage {
 
 export interface CheckinRecordsPage extends CheckinPage {
   records: CheckinRecord[];
+}
+
+export interface CheckinAdjustmentRequest {
+  request_id: string;
+  user_ids: string[];
+  amount: number;
+}
+
+export interface CheckinAdjustmentResult {
+  request_id: string;
+  amount: number;
+  replayed: boolean;
+  results: {
+    user_id: string;
+    previous_points: number;
+    total_points: number;
+  }[];
 }
 
 export interface CheckinQuery {
@@ -147,6 +164,7 @@ export interface SynapseDataProvider extends DataProvider {
   setCheckinSettings: (settings: CheckinSettings) => Promise<CheckinSettings>;
   getCheckinUsers: (query: CheckinQuery) => Promise<CheckinUsersPage>;
   getCheckinRecords: (query: CheckinQuery) => Promise<CheckinRecordsPage>;
+  adjustCheckinPoints: (request: CheckinAdjustmentRequest) => Promise<CheckinAdjustmentResult>;
   getPasswordHelpRequests: (query: PasswordHelpRequestsQuery) => Promise<PasswordHelpRequestsPage>;
   updatePasswordHelpRequest: (
     requestId: string,

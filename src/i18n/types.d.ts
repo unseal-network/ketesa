@@ -863,6 +863,34 @@ export interface SynapseTranslationMessages extends TranslationMessages {
         view_records: string;
         settings: string;
       };
+      adjustment: {
+        title: string;
+        description: string;
+        user_ids: string;
+        user_ids_helper: string;
+        amount: string;
+        amount_helper: string;
+        review: string;
+        confirm_title: string;
+        confirm_body: string;
+        confirm: string;
+        cancel: string;
+        processing: string;
+        success: string;
+        replayed: string;
+        failure: string;
+        validation: {
+          users_required: string;
+          too_many_users: string;
+          duplicate_users: string;
+          invalid_amount: string;
+        };
+        result: {
+          user: string;
+          previous: string;
+          current: string;
+        };
+      };
       empty: string;
       load_failure: string;
     };

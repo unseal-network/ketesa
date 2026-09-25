@@ -5,7 +5,13 @@ vi.mock("../http", () => ({
 }));
 
 import { jsonClient } from "../http";
-import { getCheckinRecords, getCheckinSettings, getCheckinUsers, setCheckinSettings } from "./checkin";
+import {
+  adjustCheckinPoints,
+  getCheckinRecords,
+  getCheckinSettings,
+  getCheckinUsers,
+  setCheckinSettings,
+} from "./checkin";
 
 const mockedJsonClient = vi.mocked(jsonClient);
 
@@ -68,6 +74,29 @@ describe("checkin settings data provider", () => {
     ).resolves.toEqual(response);
     expect(mockedJsonClient).toHaveBeenCalledWith(
       "http://localhost:18008/_synapse/client/site/v1/admin/checkin/records?from=0&limit=50&search=alice&from_date=2026-09-01&to_date=2026-09-30"
+    );
+  });
+
+  it("posts a signed bulk adjustment with its idempotency key", async () => {
+    const request = {
+      request_id: "bulk-adjustment-1",
+      user_ids: ["@alice:test", "@bob:test"],
+      amount: -5,
+    };
+    const response = {
+      ...request,
+      replayed: false,
+      results: [
+        { user_id: "@alice:test", previous_points: 10, total_points: 5 },
+        { user_id: "@bob:test", previous_points: 8, total_points: 3 },
+      ],
+    };
+    mockedJsonClient.mockResolvedValue(jsonResponse(response));
+
+    await expect(adjustCheckinPoints(request)).resolves.toEqual(response);
+    expect(mockedJsonClient).toHaveBeenCalledWith(
+      "http://localhost:18008/_synapse/client/site/v1/admin/checkin/adjustments",
+      { method: "POST", body: JSON.stringify(request) }
     );
   });
 });

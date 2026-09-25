@@ -1,9 +1,17 @@
 import { jsonClient } from "../http";
-import { CheckinQuery, CheckinRecordsPage, CheckinSettings, CheckinUsersPage } from "../types";
+import {
+  CheckinAdjustmentRequest,
+  CheckinAdjustmentResult,
+  CheckinQuery,
+  CheckinRecordsPage,
+  CheckinSettings,
+  CheckinUsersPage,
+} from "../types";
 
 const CHECKIN_SETTINGS_PATH = "/_synapse/client/site/v1/admin/checkin/settings";
 const CHECKIN_USERS_PATH = "/_synapse/client/site/v1/admin/checkin/users";
 const CHECKIN_RECORDS_PATH = "/_synapse/client/site/v1/admin/checkin/records";
+const CHECKIN_ADJUSTMENTS_PATH = "/_synapse/client/site/v1/admin/checkin/adjustments";
 
 const getCheckinAdminUrl = (path: string, query?: CheckinQuery) => {
   const baseUrl = localStorage.getItem("base_url");
@@ -37,4 +45,12 @@ export const getCheckinUsers = async (query: CheckinQuery): Promise<CheckinUsers
 export const getCheckinRecords = async (query: CheckinQuery): Promise<CheckinRecordsPage> => {
   const { json } = await jsonClient(getCheckinAdminUrl(CHECKIN_RECORDS_PATH, query));
   return json as CheckinRecordsPage;
+};
+
+export const adjustCheckinPoints = async (request: CheckinAdjustmentRequest): Promise<CheckinAdjustmentResult> => {
+  const { json } = await jsonClient(getCheckinAdminUrl(CHECKIN_ADJUSTMENTS_PATH), {
+    method: "POST",
+    body: JSON.stringify(request),
+  });
+  return json as CheckinAdjustmentResult;
 };

@@ -82,7 +82,13 @@ import {
 import { uploadMedia } from "../matrix";
 import { CACHED_MANY_REF, resourceMap } from "../../resourceMap";
 import { etkeProviderMethods } from "./etke";
-import { getCheckinRecords, getCheckinSettings, getCheckinUsers, setCheckinSettings } from "./checkin";
+import {
+  adjustCheckinPoints,
+  getCheckinRecords,
+  getCheckinSettings,
+  getCheckinUsers,
+  setCheckinSettings,
+} from "./checkin";
 import { getPasswordHelpRequests, updatePasswordHelpRequest } from "./passwordHelp";
 import { getStatisticsReport } from "./statistics";
 import { SynapseDataProvider } from "../types";
@@ -811,6 +817,7 @@ const baseDataProvider: SynapseDataProvider = {
   setCheckinSettings,
   getCheckinUsers,
   getCheckinRecords,
+  adjustCheckinPoints,
   getPasswordHelpRequests,
   updatePasswordHelpRequest,
   getStatisticsReport,

@@ -3,6 +3,11 @@ import {
   Alert,
   Box,
   Button,
+  Dialog,
+  DialogActions,
+  DialogContent,
+  DialogContentText,
+  DialogTitle,
   LinearProgress,
   Paper,
   Stack,
@@ -23,7 +28,13 @@ import { Title, useDataProvider, useTranslate } from "react-admin";
 import { useNavigate } from "react-router-dom";
 
 import { useDocTitle } from "../components/hooks/useDocTitle";
-import { CheckinRecord, CheckinUserSummary, SynapseDataProvider } from "../providers/types";
+import {
+  CheckinAdjustmentRequest,
+  CheckinAdjustmentResult,
+  CheckinRecord,
+  CheckinUserSummary,
+  SynapseDataProvider,
+} from "../providers/types";
 
 type CheckinView = "users" | "records";
 
@@ -35,6 +46,34 @@ interface CheckinFilters {
 
 const PAGE_SIZE_OPTIONS = [25, 50, 100];
 const INITIAL_FILTERS: CheckinFilters = { search: "", fromDate: "", toDate: "" };
+
+interface PendingAdjustment {
+  request: CheckinAdjustmentRequest;
+  signature: string;
+}
+
+interface RetryRequest {
+  requestId: string;
+  signature: string;
+}
+
+const parseAdjustmentUserIds = (value: string) =>
+  value
+    .split(/\r?\n/)
+    .map(userId => userId.trim())
+    .filter(Boolean);
+
+const parseAdjustmentAmount = (value: string): number | null => {
+  const normalized = value.trim();
+  if (!/^[+-]?\d+$/.test(normalized)) return null;
+  const amount = Number(normalized);
+  return Number.isSafeInteger(amount) && amount !== 0 && Math.abs(amount) <= 1_000_000 ? amount : null;
+};
+
+const createRequestId = () =>
+  globalThis.crypto?.randomUUID?.() ?? `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+
+const formatAdjustment = (amount: number) => (amount > 0 ? `+${amount}` : String(amount));
 
 const compactQuery = (filters: CheckinFilters, from: number, limit: number, includeDates: boolean) => ({
   from,
@@ -63,6 +102,26 @@ const CheckinAdminPage = () => {
   const [total, setTotal] = useState(0);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
+  const [refreshVersion, setRefreshVersion] = useState(0);
+  const [adjustmentUserIds, setAdjustmentUserIds] = useState("");
+  const [adjustmentAmount, setAdjustmentAmount] = useState("");
+  const [attemptedReview, setAttemptedReview] = useState(false);
+  const [pendingAdjustment, setPendingAdjustment] = useState<PendingAdjustment | null>(null);
+  const [retryRequest, setRetryRequest] = useState<RetryRequest | null>(null);
+  const [adjustmentLoading, setAdjustmentLoading] = useState(false);
+  const [adjustmentError, setAdjustmentError] = useState<string | null>(null);
+  const [adjustmentResult, setAdjustmentResult] = useState<CheckinAdjustmentResult | null>(null);
+  const adjustmentUserList = useMemo(() => parseAdjustmentUserIds(adjustmentUserIds), [adjustmentUserIds]);
+  const parsedAmount = useMemo(() => parseAdjustmentAmount(adjustmentAmount), [adjustmentAmount]);
+  const userIdsValidation =
+    adjustmentUserList.length === 0
+      ? "users_required"
+      : adjustmentUserList.length > 100
+        ? "too_many_users"
+        : new Set(adjustmentUserList).size !== adjustmentUserList.length
+          ? "duplicate_users"
+          : null;
+  const amountValidation = parsedAmount === null ? "invalid_amount" : null;
   const invalidDateRange =
     view === "records" &&
     draftFilters.fromDate !== "" &&
@@ -105,7 +164,50 @@ const CheckinAdminPage = () => {
     return () => {
       cancelled = true;
     };
-  }, [dataProvider, query, view]);
+  }, [dataProvider, query, refreshVersion, view]);
+
+  const reviewAdjustment = (event: FormEvent) => {
+    event.preventDefault();
+    setAttemptedReview(true);
+    setAdjustmentError(null);
+    setAdjustmentResult(null);
+    if (userIdsValidation || amountValidation || parsedAmount === null) return;
+
+    const signature = JSON.stringify({ user_ids: adjustmentUserList, amount: parsedAmount });
+    const requestId = retryRequest?.signature === signature ? retryRequest.requestId : createRequestId();
+    setPendingAdjustment({
+      request: { request_id: requestId, user_ids: adjustmentUserList, amount: parsedAmount },
+      signature,
+    });
+  };
+
+  const applyAdjustment = async () => {
+    if (!pendingAdjustment) return;
+    setAdjustmentLoading(true);
+    setAdjustmentError(null);
+    try {
+      const result = await dataProvider.adjustCheckinPoints(pendingAdjustment.request);
+      setAdjustmentResult(result);
+      setRetryRequest(null);
+      setPendingAdjustment(null);
+      setAdjustmentUserIds("");
+      setAdjustmentAmount("");
+      setAttemptedReview(false);
+      setView("users");
+      setPage(0);
+      setRefreshVersion(version => version + 1);
+    } catch (error) {
+      const message = error instanceof Error ? error.message : String(error);
+      setAdjustmentError(translate("resources.checkin_admin.adjustment.failure", { error: message }));
+      setRetryRequest({
+        requestId: pendingAdjustment.request.request_id,
+        signature: pendingAdjustment.signature,
+      });
+      setPendingAdjustment(null);
+    } finally {
+      setAdjustmentLoading(false);
+    }
+  };
 
   const applyFilters = (event: FormEvent) => {
     event.preventDefault();
@@ -147,6 +249,82 @@ const CheckinAdminPage = () => {
           {translate("resources.checkin_admin.action.settings")}
         </Button>
       </Stack>
+
+      <Paper component="section" variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Stack spacing={1.5}>
+          <Box>
+            <Typography variant="h6">{translate("resources.checkin_admin.adjustment.title")}</Typography>
+            <Typography variant="body2" color="text.secondary">
+              {translate("resources.checkin_admin.adjustment.description")}
+            </Typography>
+          </Box>
+          <Stack component="form" onSubmit={reviewAdjustment} spacing={1.5}>
+            <TextField
+              fullWidth
+              multiline
+              minRows={3}
+              maxRows={8}
+              label={translate("resources.checkin_admin.adjustment.user_ids")}
+              value={adjustmentUserIds}
+              onChange={event => setAdjustmentUserIds(event.target.value)}
+              error={attemptedReview && userIdsValidation !== null}
+              helperText={
+                attemptedReview && userIdsValidation
+                  ? translate(`resources.checkin_admin.adjustment.validation.${userIdsValidation}`)
+                  : translate("resources.checkin_admin.adjustment.user_ids_helper")
+              }
+            />
+            <Stack direction={{ xs: "column", sm: "row" }} alignItems={{ sm: "flex-start" }} gap={1.5}>
+              <TextField
+                type="number"
+                label={translate("resources.checkin_admin.adjustment.amount")}
+                value={adjustmentAmount}
+                onChange={event => setAdjustmentAmount(event.target.value)}
+                error={attemptedReview && amountValidation !== null}
+                helperText={
+                  attemptedReview && amountValidation
+                    ? translate(`resources.checkin_admin.adjustment.validation.${amountValidation}`)
+                    : translate("resources.checkin_admin.adjustment.amount_helper")
+                }
+                slotProps={{ htmlInput: { step: 1 } }}
+                sx={{ width: { xs: "100%", sm: 300 } }}
+              />
+              <Button type="submit" variant="contained" disabled={adjustmentLoading} sx={{ minHeight: 40 }}>
+                {translate("resources.checkin_admin.adjustment.review")}
+              </Button>
+            </Stack>
+          </Stack>
+
+          {adjustmentError && (
+            <Alert severity="error" role="alert">
+              {adjustmentError}
+            </Alert>
+          )}
+          {adjustmentResult && (
+            <Alert severity="success" role="status">
+              <Stack spacing={1}>
+                <Typography>
+                  {translate("resources.checkin_admin.adjustment.success", {
+                    amount: formatAdjustment(adjustmentResult.amount),
+                    count: adjustmentResult.results.length,
+                  })}
+                </Typography>
+                {adjustmentResult.replayed && (
+                  <Typography>{translate("resources.checkin_admin.adjustment.replayed")}</Typography>
+                )}
+                <Box component="ul" sx={{ m: 0, pl: 2.5 }}>
+                  {adjustmentResult.results.map(result => (
+                    <Box component="li" key={result.user_id}>
+                      <Typography component="span">{result.user_id}</Typography>
+                      {`: ${result.previous_points} → ${result.total_points}`}
+                    </Box>
+                  ))}
+                </Box>
+              </Stack>
+            </Alert>
+          )}
+        </Stack>
+      </Paper>
 
       <Paper variant="outlined">
         <Tabs
@@ -304,6 +482,50 @@ const CheckinAdminPage = () => {
           }}
         />
       </Paper>
+
+      <Dialog
+        open={pendingAdjustment !== null}
+        onClose={() => !adjustmentLoading && setPendingAdjustment(null)}
+        aria-labelledby="checkin-adjustment-confirm-title"
+        fullWidth
+        maxWidth="sm"
+      >
+        <DialogTitle id="checkin-adjustment-confirm-title">
+          {translate("resources.checkin_admin.adjustment.confirm_title")}
+        </DialogTitle>
+        <DialogContent>
+          <DialogContentText>
+            {pendingAdjustment &&
+              translate("resources.checkin_admin.adjustment.confirm_body", {
+                amount: formatAdjustment(pendingAdjustment.request.amount),
+                count: pendingAdjustment.request.user_ids.length,
+              })}
+          </DialogContentText>
+          {pendingAdjustment && (
+            <Box
+              component="ul"
+              aria-label={translate("resources.checkin_admin.adjustment.user_ids")}
+              sx={{ maxHeight: 200, overflowY: "auto", pl: 3, mb: 0 }}
+            >
+              {pendingAdjustment.request.user_ids.map(userId => (
+                <Box component="li" key={userId} sx={{ overflowWrap: "anywhere" }}>
+                  {userId}
+                </Box>
+              ))}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPendingAdjustment(null)} disabled={adjustmentLoading}>
+            {translate("resources.checkin_admin.adjustment.cancel")}
+          </Button>
+          <Button onClick={() => void applyAdjustment()} variant="contained" disabled={adjustmentLoading}>
+            {adjustmentLoading
+              ? translate("resources.checkin_admin.adjustment.processing")
+              : translate("resources.checkin_admin.adjustment.confirm")}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
