@@ -3,12 +3,13 @@ import { TopToolbar, useRecordContext } from "react-admin";
 import { AllowCrossSigningButton } from "../../components/users/buttons/AllowCrossSigningButton";
 import DeleteUserButton from "../../components/users/buttons/DeleteUserButton";
 import { RenewAccountValidityButton } from "../../components/users/buttons/RenewAccountValidityButton";
+import ResetPasswordButton from "../../components/users/buttons/ResetPasswordButton";
 import { ServerNoticeButton } from "../../components/users/ServerNotices";
 import { useIsMAS } from "../../providers/data/mas";
 import { isSystemUser } from "../../utils/mxid";
 import { UserPreventSelfDelete } from "./List";
 
-/** Existing-user actions deliberately exclude credential and contact mutations. */
+/** Password changes stay in a dedicated confirmation flow instead of inline user editing. */
 export const UserEditActions = () => {
   const record = useRecordContext();
   const isMAS = useIsMAS();
@@ -25,6 +26,7 @@ export const UserEditActions = () => {
       {!record?.deactivated && !isMAS && <AllowCrossSigningButton />}
       {!record?.deactivated && !isMAS && <RenewAccountValidityButton />}
       {!record?.deactivated && <ServerNoticeButton />}
+      {record?.id && !record.deactivated && !isMAS && <ResetPasswordButton />}
       {record && record.id && (
         <UserPreventSelfDelete ownUserIsSelected={ownUserIsSelected} systemUserIsSelected={systemUserIsSelected}>
           <DeleteUserButton

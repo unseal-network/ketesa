@@ -90,12 +90,20 @@ const users = {
     reset_password: {
       label: "Repor palavra-passe",
       title: "Repor palavra-passe",
-      helper: "Alterar a palavra-passe de %{user}",
-      password: "Palavra-passe",
+      helper:
+        "Defina uma nova palavra-passe para %{user}. Esta ação termina a sessão em todos os dispositivos existentes.",
+      password: "Nova palavra-passe",
+      confirm_password: "Confirmar nova palavra-passe",
+      target: "Confirmar utilizador de destino",
+      target_helper: "Introduza %{user} exatamente para confirmar esta conta.",
+      show_password: "Mostrar palavra-passe",
+      saving: "A repor palavra-passe…",
       logout_devices: "Terminar sessão em todos os dispositivos",
       success: "Palavra-passe reposta com sucesso",
       failure: "Falha ao repor a palavra-passe",
       error_no_password: "A palavra-passe é obrigatória",
+      error_password_mismatch: "As palavras-passe não coincidem",
+      error_target_mismatch: "Introduza o ID do utilizador de destino exatamente",
     },
     login_as: {
       label: "Entrar como utilizador",

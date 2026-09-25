@@ -101,12 +101,20 @@ const users = {
     reset_password: {
       label: "Passwort zurücksetzen",
       title: "Passwort zurücksetzen",
-      helper: "Passwort von %{user} ändern",
-      password: "Passwort",
+      helper:
+        "Neues Passwort für %{user} festlegen. Dadurch wird der Benutzer von allen bestehenden Geräten abgemeldet.",
+      password: "Neues Passwort",
+      confirm_password: "Neues Passwort bestätigen",
+      target: "Zielbenutzer bestätigen",
+      target_helper: "Geben Sie %{user} genau ein, um dieses Konto zu bestätigen.",
+      show_password: "Passwort anzeigen",
+      saving: "Passwort wird zurückgesetzt…",
       logout_devices: "Von allen Geräten abmelden",
       success: "Passwort wurde erfolgreich zurückgesetzt",
       failure: "Passwort konnte nicht zurückgesetzt werden",
       error_no_password: "Passwort ist erforderlich",
+      error_password_mismatch: "Passwörter stimmen nicht überein",
+      error_target_mismatch: "Geben Sie die ID des Zielbenutzers genau ein",
     },
     login_as: {
       label: "Als Benutzer anmelden",

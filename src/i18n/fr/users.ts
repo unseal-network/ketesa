@@ -100,12 +100,20 @@ const users = {
     reset_password: {
       label: "Réinitialiser le mot de passe",
       title: "Réinitialiser le mot de passe",
-      helper: "Changer le mot de passe de %{user}",
-      password: "Mot de passe",
+      helper:
+        "Définissez un nouveau mot de passe pour %{user}. Tous ses appareils actuellement connectés seront déconnectés.",
+      password: "Nouveau mot de passe",
+      confirm_password: "Confirmer le nouveau mot de passe",
+      target: "Confirmer l'utilisateur cible",
+      target_helper: "Saisissez exactement %{user} pour confirmer ce compte.",
+      show_password: "Afficher le mot de passe",
+      saving: "Réinitialisation du mot de passe…",
       logout_devices: "Déconnecter tous les appareils",
       success: "Le mot de passe a été réinitialisé avec succès",
       failure: "Échec de la réinitialisation du mot de passe",
       error_no_password: "Le mot de passe est requis",
+      error_password_mismatch: "Les mots de passe ne correspondent pas",
+      error_target_mismatch: "Saisissez exactement l'identifiant de l'utilisateur cible",
     },
     login_as: {
       label: "Se connecter en tant qu'utilisateur",

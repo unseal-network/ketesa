@@ -234,10 +234,17 @@ export interface SynapseTranslationMessages extends TranslationMessages {
           title: string;
           helper: string;
           password: string;
+          confirm_password: string;
+          target: string;
+          target_helper: string;
+          show_password: string;
+          saving: string;
           logout_devices: string;
           success: string;
           failure: string;
           error_no_password: string;
+          error_password_mismatch: string;
+          error_target_mismatch: string;
         };
         login_as: {
           label: string;
