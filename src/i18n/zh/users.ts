@@ -187,6 +187,14 @@ const users = {
     burst_count: "突发计数",
     burst_count_text: "在限制之前可以执行的操作数。",
   },
+  phone_remark: {
+    label: "手机号（备注）",
+    helper: "用户注册时填写，未经验证。",
+    not_provided: "未填写",
+    unavailable: "当前服务器不支持此功能",
+    load_failed: "无法加载手机号",
+    updated_at: "更新于 %{date}",
+  },
   account_data: {
     title: "账户数据",
     global: "全局",

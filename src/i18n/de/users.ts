@@ -203,6 +203,14 @@ const users = {
     burst_count: "Burst-Anzahl",
     burst_count_text: "Die Anzahl der Aktionen, die vor der Begrenzung durchgeführt werden können.",
   },
+  phone_remark: {
+    label: "Telefon (Notiz)",
+    helper: "Vom Benutzer bei der Registrierung angegeben; nicht verifiziert.",
+    not_provided: "Nicht angegeben",
+    unavailable: "Auf diesem Server nicht verfügbar",
+    load_failed: "Telefonnummer konnte nicht geladen werden",
+    updated_at: "Aktualisiert %{date}",
+  },
   account_data: {
     title: "Kontodaten",
     global: "Globale",

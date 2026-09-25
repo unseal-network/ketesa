@@ -203,6 +203,14 @@ const users = {
     burst_count: "Compteur de pics",
     burst_count_text: "Le nombre d'actions que l'utilisateur peut effectuer avant d'être limité.",
   },
+  phone_remark: {
+    label: "Téléphone (remarque)",
+    helper: "Saisi par l'utilisateur lors de l'inscription ; non vérifié.",
+    not_provided: "Non renseigné",
+    unavailable: "Non disponible sur ce serveur",
+    load_failed: "Impossible de charger le numéro de téléphone",
+    updated_at: "Mis à jour %{date}",
+  },
   account_data: {
     title: "Données du compte",
     global: "Globales",

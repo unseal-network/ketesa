@@ -91,6 +91,7 @@ import {
 } from "./checkin";
 import { getPasswordHelpRequests, updatePasswordHelpRequest } from "./passwordHelp";
 import { getStatisticsReport } from "./statistics";
+import { getUserPhone } from "./userPhone";
 import { SynapseDataProvider } from "../types";
 import { isSystemUser, getLocalpart } from "../../utils/mxid";
 import {
@@ -820,6 +821,7 @@ const baseDataProvider: SynapseDataProvider = {
   adjustCheckinPoints,
   getPasswordHelpRequests,
   updatePasswordHelpRequest,
+  getUserPhone,
   getStatisticsReport,
 
   ...etkeProviderMethods,

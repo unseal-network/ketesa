@@ -196,6 +196,14 @@ const users = {
     burst_count: "ظرفیت انفجاری",
     burst_count_text: "تعداد عملیاتی که می‌تواند قبل از محدودیت انجام شود.",
   },
+  phone_remark: {
+    label: "تلفن (یادداشت)",
+    helper: "توسط کاربر هنگام ثبت‌نام وارد شده است؛ تأیید نشده.",
+    not_provided: "وارد نشده",
+    unavailable: "در این سرور در دسترس نیست",
+    load_failed: "بارگیری شماره تلفن ناموفق بود",
+    updated_at: "به‌روزرسانی %{date}",
+  },
   account_data: {
     title: "داده‌های کاربر",
     global: "عمومی",

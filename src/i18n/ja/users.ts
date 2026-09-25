@@ -195,6 +195,14 @@ const users = {
     burst_count: "バースト数",
     burst_count_text: "レート制限が適用されるまでに実行できるアクションの数。",
   },
+  phone_remark: {
+    label: "電話番号（備考）",
+    helper: "登録時にユーザーが入力したもので、検証されていません。",
+    not_provided: "未入力",
+    unavailable: "このサーバーでは利用できません",
+    load_failed: "電話番号を読み込めませんでした",
+    updated_at: "更新日時 %{date}",
+  },
   account_data: {
     title: "アカウントのデータ",
     global: "グローバル",

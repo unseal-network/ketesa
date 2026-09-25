@@ -200,6 +200,14 @@ const users = {
     burst_count: "Burst-conteggio",
     burst_count_text: "Il numero di azioni che l'utente può eseguire prima di essere limitato.",
   },
+  phone_remark: {
+    label: "Telefono (nota)",
+    helper: "Inserito dall'utente durante la registrazione; non verificato.",
+    not_provided: "Non fornito",
+    unavailable: "Non disponibile su questo server",
+    load_failed: "Impossibile caricare il numero di telefono",
+    updated_at: "Aggiornato %{date}",
+  },
   account_data: {
     title: "Dati del profilo",
     global: "Globale",

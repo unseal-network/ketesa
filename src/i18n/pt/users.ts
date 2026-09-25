@@ -201,6 +201,14 @@ const users = {
     burst_count: "Contagem de rajada",
     burst_count_text: "O número de ações que podem ser realizadas antes de o limite de taxa ser aplicado.",
   },
+  phone_remark: {
+    label: "Telefone (observação)",
+    helper: "Introduzido pelo utilizador no registo; não verificado.",
+    not_provided: "Não indicado",
+    unavailable: "Não disponível neste servidor",
+    load_failed: "Não foi possível carregar o número de telefone",
+    updated_at: "Atualizado %{date}",
+  },
   account_data: {
     title: "Dados da conta",
     global: "Global",

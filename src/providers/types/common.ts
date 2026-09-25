@@ -158,6 +158,12 @@ export interface PasswordHelpRequestsQuery {
   status?: PasswordHelpRequestStatus;
 }
 
+export interface UserPhone {
+  user_id: string;
+  phone: string | null;
+  updated_at_ms: number | null;
+}
+
 export interface SynapseDataProvider extends DataProvider {
   getStatisticsReport: (query?: StatisticsReportQuery) => Promise<StatisticsReport>;
   getCheckinSettings: () => Promise<CheckinSettings>;
@@ -170,6 +176,7 @@ export interface SynapseDataProvider extends DataProvider {
     requestId: string,
     status: Exclude<PasswordHelpRequestStatus, "PENDING">
   ) => Promise<PasswordHelpRequest>;
+  getUserPhone: (userId: string) => Promise<UserPhone | null>;
   deleteMedia: (params: DeleteMediaParams) => Promise<DeleteMediaResult>;
   purgeRemoteMedia: (params: Pick<DeleteMediaParams, "before_ts">) => Promise<DeleteMediaResult>;
   uploadMedia: (params: UploadMediaParams) => Promise<UploadMediaResult>;

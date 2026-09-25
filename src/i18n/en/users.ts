@@ -194,6 +194,14 @@ const users = {
     burst_count: "Burst count",
     burst_count_text: "The number of actions that can be performed before rate limiting applies.",
   },
+  phone_remark: {
+    label: "Phone (remark)",
+    helper: "Entered by the user at registration; not verified.",
+    not_provided: "Not provided",
+    unavailable: "Not available on this server",
+    load_failed: "Could not load phone number",
+    updated_at: "Updated %{date}",
+  },
   account_data: {
     title: "Account Data",
     global: "Global",

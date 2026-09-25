@@ -331,6 +331,14 @@ export interface SynapseTranslationMessages extends TranslationMessages {
         burst_count: string;
         burst_count_text: string;
       };
+      phone_remark: {
+        label: string;
+        helper: string;
+        not_provided: string;
+        unavailable: string;
+        load_failed: string;
+        updated_at: string;
+      };
       account_data: {
         title: string;
         global: string;

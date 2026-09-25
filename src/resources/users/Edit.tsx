@@ -102,6 +102,7 @@ import DeviceRemoveButton, { DeviceBulkRemoveButton } from "../../components/use
 import ExperimentalFeaturesList from "../../components/users/ExperimentalFeatures";
 import UserAccountData from "../../components/users/UserAccountData";
 import UserInfoChips from "../../components/users/UserCounts";
+import UserPhoneRemark from "../../components/users/UserPhoneRemark";
 import UserRateLimits from "../../components/users/UserRateLimits";
 import { useDocTitle } from "../../components/hooks/useDocTitle";
 import { MediaIDField, ProtectMediaButton, QuarantineMediaButton } from "../../components/media";
@@ -872,6 +873,7 @@ export const UserEdit = (props: EditProps) => {
               <Box sx={{ flex: 1 }}>
                 <TextInput source="id" readOnly fullWidth />
                 <TextInput source="displayname" fullWidth />
+                <UserPhoneRemark />
                 <SelectInput source="user_type" choices={choices_type} translateChoice={false} resettable fullWidth />
               </Box>
             </Box>
@@ -897,6 +899,7 @@ export const UserEdit = (props: EditProps) => {
                 <TextInput source="id" readOnly fullWidth label="resources.users.fields.id" />
                 <TextInput source="mas_id" readOnly fullWidth label="resources.mas_users.fields.id" />
                 <TextInput source="displayname" fullWidth />
+                <UserPhoneRemark />
                 <SelectInput source="user_type" choices={choices_type} translateChoice={false} resettable fullWidth />
               </Box>
             </Box>
